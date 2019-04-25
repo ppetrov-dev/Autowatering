@@ -5,31 +5,11 @@
 #include "LCD_1602_RUS.h"
 #include "OneButton.h"
 
-#define IS_LCD_AUTO_OFF 1
-#define Lcd_TIMEOUT_SECONDS 60
-#define ENCODER_TYPE 0 // тип энкодера (0 или 1). Если энкодер работает некорректно (пропуск шагов), смените тип
-#define IS_ENCODER_REVERSED 0
+#include "converters.h"
+#include "settings.h"
+#include "enums.h"
 
-#define DEFAULT_PUMP_STATE 0 // реле: 1 - высокого уровня (или мосфет), 0 - низкого
-
-enum StartTimerOption
-{
-  WhenPumpIsOn,
-  WhenPumpIsOff
-};
-enum StartTimerOption _startTimerOption = WhenPumpIsOff;
-
-static const wchar_t *PUMPS_NAMES[] = {
-    L"Pump 1",
-    L"Pump 2"};
-
-#define PIN_clk 2
-#define PIN_dt 3
-#define PIN_sw 4
-#define PIN_Button1 5
-#define PIN_Button2 6
-#define PUPM_AMOUNT 2
-#define PIN_FirstPump 7
+enum LcdCursorPosition _lcdCursorPosition;
 
 OneButton button1(PIN_Button1, true);
 OneButton button2(PIN_Button2, true);
@@ -50,19 +30,6 @@ bool startFlag = true;
 
 bool _isLcdOn = true;
 unsigned long _lastEncoderUpdateTime;
-
-enum LcdCursorPosition
-{
-  SelectPump,
-  SelectPauseDays,
-  SelectPauseHours,
-  SelectPauseMinutes,
-  SelectWorkDays,
-  SelectWorkHours,
-  SelectWorkMinutes
-};
-
-enum LcdCursorPosition _lcdCursorPosition;
 
 void PrintSelectedPumpName()
 {
@@ -96,17 +63,6 @@ void TurnLcdOn()
   _lcd.backlight();
 }
 
-unsigned long ConvertSecondsToMilliseconds(unsigned long seconds)
-{
-  return seconds * 1000;
-}
-
-unsigned long ConvertMinutesToMilliseconds(unsigned long minutes)
-{
-  unsigned long seconds = minutes * 60;
-  return ConvertSecondsToMilliseconds(seconds);
-}
-
 bool IsLcdTimeoutExpired()
 {
   return millis() - _lastEncoderUpdateTime >= ConvertSecondsToMilliseconds(Lcd_TIMEOUT_SECONDS);
@@ -126,7 +82,7 @@ void TurnPumpOn(byte pumpNumber)
   digitalWrite(_pumpPins[pumpNumber], !DEFAULT_PUMP_STATE);
   _isPumping = true;
 
-  if(_startTimerOption == WhenPumpIsOn)
+  if(START_TIMER_OPTION == WhenPumpIsOn)
     _pumpTimersInMilliseconds[pumpNumber] = millis();
     
     //Serial.println("Pump #" + String(i) + " ON");
@@ -137,7 +93,7 @@ void TurnPumpOff(byte pumpNumber)
   digitalWrite(_pumpPins[pumpNumber], DEFAULT_PUMP_STATE);
   _isPumping = false;
 
-  if(_startTimerOption == WhenPumpIsOff)
+  if(START_TIMER_OPTION == WhenPumpIsOff)
     _pumpTimersInMilliseconds[pumpNumber] = millis();
 
     //Serial.println("Pump #" + String(i) + " OFF");
@@ -373,26 +329,26 @@ void HandleEncoderTick()
       TurnLcdOn();
   }
 }
-void ForcePumping(unsigned int pin, bool isOn)
+void ForceWatering(unsigned int pin, bool isOn)
 {
   digitalWrite(pin, isOn);
 }
 
 void OnLongPressButton1Start()
 {
-  ForcePumping(_pumpPins[0], HIGH);
+  ForceWatering(_pumpPins[0], HIGH);
 }
 void OnLongPressButton1Stop()
 {
-  ForcePumping(_pumpPins[0], LOW);
+  ForceWatering(_pumpPins[0], LOW);
 }
 void OnLongPressButton2Start()
 {
-  ForcePumping(_pumpPins[1], HIGH);
+  ForceWatering(_pumpPins[1], HIGH);
 }
 void OnLongPressButton2Stop()
 {
-  ForcePumping(_pumpPins[1], LOW);
+  ForceWatering(_pumpPins[1], LOW);
 }
 
 void setup()
