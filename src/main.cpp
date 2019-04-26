@@ -1,19 +1,19 @@
 #include <Arduino.h>
-#include "GyverEncoder.h"
 #include <EEPROMex.h>
 #include <EEPROMVar.h>
 #include "LCD_1602_RUS.h"
 #include "OneButton.h"
 
+#include "AutoPumpEncoder.h"
 #include "converters.h"
 #include "settings.h"
 #include "enums.h"
 
 enum LcdCursorPosition _lcdCursorPosition;
 
-OneButton button1(PIN_Button1, true);
-OneButton button2(PIN_Button2, true);
-Encoder _encoder(PIN_clk, PIN_dt, PIN_sw);
+AutoPumpEncoder _autoPumpEncoder(PIN_clk, PIN_dt, PIN_sw);
+OneButton _pumpButton1(PIN_Button1, true);
+OneButton _pumpButton2(PIN_Button2, true);
 LCD_1602_RUS _lcd(0x27, 16, 2);
 
 uint32_t _pumpTimersInMilliseconds[PUPM_AMOUNT];
@@ -53,8 +53,8 @@ uint32_t ConvertSelectedDaysHoursMinutesToMinutes()
 
 void UpdateDataInMemoryForSelectedPump()
 {
-  EEPROM.updateLong(8 * _selectedPumpNumber, _pumpPauseTimesInMinutes[_selectedPumpNumber]);
-  EEPROM.updateLong(8 * _selectedPumpNumber + 4, _pumpWorkTimesInMinutes[_selectedPumpNumber]);
+  // EEPROM.updateLong(8 * _selectedPumpNumber, _pumpPauseTimesInMinutes[_selectedPumpNumber]);
+  // EEPROM.updateLong(8 * _selectedPumpNumber + 4, _pumpWorkTimesInMinutes[_selectedPumpNumber]);
 }
 
 void TurnLcdOn()
@@ -82,10 +82,10 @@ void TurnPumpOn(byte pumpNumber)
   digitalWrite(_pumpPins[pumpNumber], !DEFAULT_PUMP_STATE);
   _isPumping = true;
 
-  if(START_TIMER_OPTION == WhenPumpIsOn)
+  if (START_TIMER_OPTION == WhenPumpIsOn)
     _pumpTimersInMilliseconds[pumpNumber] = millis();
-    
-    //Serial.println("Pump #" + String(i) + " ON");
+
+  //Serial.println("Pump #" + String(i) + " ON");
 }
 
 void TurnPumpOff(byte pumpNumber)
@@ -93,10 +93,10 @@ void TurnPumpOff(byte pumpNumber)
   digitalWrite(_pumpPins[pumpNumber], DEFAULT_PUMP_STATE);
   _isPumping = false;
 
-  if(START_TIMER_OPTION == WhenPumpIsOff)
+  if (START_TIMER_OPTION == WhenPumpIsOff)
     _pumpTimersInMilliseconds[pumpNumber] = millis();
 
-    //Serial.println("Pump #" + String(i) + " OFF");
+  //Serial.println("Pump #" + String(i) + " OFF");
 }
 
 void CheckPumpsToWaterAndOnIfNeeded()
@@ -303,32 +303,6 @@ LcdCursorPosition GetPreviousLcdCursorPosition()
   }
 }
 
-void HandleEncoderTick()
-{
-  _encoder.tick();
-
-  if (_encoder.isTurn())
-  {
-    _lastEncoderUpdateTime = millis();
-
-    if (_isLcdOn)
-    {
-      if (_encoder.isRight())
-        _lcdCursorPosition = GetNextLcdCursorPosition();
-      else if (_encoder.isLeft())
-        _lcdCursorPosition = GetPreviousLcdCursorPosition();
-
-      if (_encoder.isRightH())
-        UpdateSelectedValues(1);
-      else if (_encoder.isLeftH())
-        UpdateSelectedValues(-1);
-
-      PrintDataAndUpdateArrowPosition();
-    }
-    else
-      TurnLcdOn();
-  }
-}
 void ForceWatering(unsigned int pin, bool isOn)
 {
   digitalWrite(pin, isOn);
@@ -336,19 +310,67 @@ void ForceWatering(unsigned int pin, bool isOn)
 
 void OnLongPressButton1Start()
 {
+  Serial.println("OnLongPressButton1Start");
   ForceWatering(_pumpPins[0], HIGH);
 }
 void OnLongPressButton1Stop()
 {
+  Serial.println("OnLongPressButton1Stop");
   ForceWatering(_pumpPins[0], LOW);
 }
 void OnLongPressButton2Start()
 {
+  Serial.println("OnLongPressButton2Start");
   ForceWatering(_pumpPins[1], HIGH);
 }
 void OnLongPressButton2Stop()
 {
+  Serial.println("OnLongPressButton2Stop");
   ForceWatering(_pumpPins[1], LOW);
+}
+
+void OnAutoPumpEncoderAnyTurn()
+{
+  Serial.println("OnAutoPumpEncoderAnyTurn");
+
+  _lastEncoderUpdateTime = millis();
+  if (_isLcdOn)
+    return;
+  TurnLcdOn();
+}
+
+void ExcecuteIfLcdIsOn(void (*function)(void))
+{
+  if (!_isLcdOn)
+    return;
+
+  function();
+
+  PrintDataAndUpdateArrowPosition();
+}
+
+void OnAutoPumpEncoderLeftTurn()
+{
+  Serial.println("OnAutoPumpEncoderLeftTurn");
+  ExcecuteIfLcdIsOn([]() { _lcdCursorPosition = GetPreviousLcdCursorPosition(); });
+}
+
+void OnAutoPumpEncoderRightTurn()
+{
+  Serial.println("OnAutoPumpEncoderRightTurn");
+  ExcecuteIfLcdIsOn([]() { _lcdCursorPosition = GetNextLcdCursorPosition(); });
+}
+
+void OnAutoPumpEncoderLeftHoldTurn()
+{
+  Serial.println("OnAutoPumpEncoderLeftHoldTurn");
+  ExcecuteIfLcdIsOn([]() { UpdateSelectedValues(-1); });
+}
+
+void OnAutoPumpEncoderRightHoldTurn()
+{
+  Serial.println("OnAutoPumpEncoderRightHoldTurn");
+  ExcecuteIfLcdIsOn([]() { UpdateSelectedValues(1); });
 }
 
 void setup()
@@ -356,74 +378,71 @@ void setup()
   pinMode(PIN_Button1, INPUT_PULLUP);
   pinMode(PIN_Button2, INPUT_PULLUP);
 
-  button1.attachLongPressStart(OnLongPressButton1Start);
-  button1.attachLongPressStop(OnLongPressButton1Stop);
-  button2.attachLongPressStart(OnLongPressButton2Start);
-  button2.attachLongPressStop(OnLongPressButton2Stop);
+  _pumpButton1.attachLongPressStart(OnLongPressButton1Start);
+  _pumpButton1.attachLongPressStop(OnLongPressButton1Stop);
+  _pumpButton2.attachLongPressStart(OnLongPressButton2Start);
+  _pumpButton2.attachLongPressStop(OnLongPressButton2Stop);
 
-  // --------------------- КОНФИГУРИРУЕМ ПИНЫ ---------------------
   for (byte i = 0; i < PUPM_AMOUNT; i++)
-  {                                                       // пробегаем по всем помпам
-    _pumpPins[i] = PIN_FirstPump + i;                     // настраиваем массив пинов
-    pinMode(PIN_FirstPump + i, OUTPUT);                   // настраиваем пины
-    digitalWrite(PIN_FirstPump + i, !DEFAULT_PUMP_STATE); // выключаем от греха
+  {
+    _pumpPins[i] = PIN_FirstPump + i;
+    pinMode(PIN_FirstPump + i, OUTPUT);
+    digitalWrite(PIN_FirstPump + i, DEFAULT_PUMP_STATE);
   }
-  // --------------------- ИНИЦИАЛИЗИРУЕМ ЖЕЛЕЗО ---------------------
   Serial.begin(9600);
 
   _lcd.init();
   _lcd.backlight();
   _lcd.clear();
-  //_encoder.setStepNorm(1);
-  //attachInterrupt(0, encISR, CHANGE);
-  _encoder.setType(ENCODER_TYPE);
-  if (IS_ENCODER_REVERSED)
-    _encoder.setDirection(REVERSE);
 
-  // --------------------- СБРОС НАСТРОЕК ---------------------
-  if (!digitalRead(PIN_sw))
-  { // если нажат энкодер, сбросить настройки до 1
-    _lcd.setCursor(0, 0);
-    _lcd.print("Reset settings");
-    //  EEPROM.clear();
-  }
-  while (!digitalRead(PIN_sw))
-    ;           // ждём отпускания кнопки
-  _lcd.clear(); // очищаем дисплей, продолжаем работу
+  _autoPumpEncoder.SetEncoderType(ENCODER_TYPE);
+  _autoPumpEncoder.SetEncoderDirection(IS_ENCODER_REVERSED);
+  _autoPumpEncoder.AttachOnAnyTurn(OnAutoPumpEncoderAnyTurn);
+  _autoPumpEncoder.AttachOnLeftTurn(OnAutoPumpEncoderLeftTurn);
+  _autoPumpEncoder.AttachOnRightTurn(OnAutoPumpEncoderRightTurn);
+  _autoPumpEncoder.AttachOnLeftHoldTurn(OnAutoPumpEncoderLeftHoldTurn);
+  _autoPumpEncoder.AttachOnRightHoldTurn(OnAutoPumpEncoderRightHoldTurn);
 
-  // --------------------------- НАСТРОЙКИ ---------------------------
-  // в ячейке 1023 должен быть записан флажок, если его нет - делаем (ПЕРВЫЙ ЗАПУСК)
-  if (EEPROM.read(1023) != 5)
-  {
-    EEPROM.writeByte(1023, 5);
+  // _autoPumpEncoder.Tick();
+  //   if (_autoPumpEncoder.IsHold())
+  //   {
+  //     _lcd.setCursor(0, 0);
+  //     _lcd.print("Reset settings...");
+  //     //  EEPROM.clear();
+  //   }
+  //   while (!_autoPumpEncoder.IsHold())
+  //     ;
+  //   _lcd.clear(); // очищаем дисплей, продолжаем работу
 
-    // для порядку сделаем 1 ячейки с 0 по 500
-    for (byte i = 0; i < 500; i += 4)
-    {
-      EEPROM.writeLong(i, 0);
-    }
-  }
+  // // в ячейке 1023 должен быть записан флажок, если его нет - делаем (ПЕРВЫЙ ЗАПУСК)
+  // if (EEPROM.read(1023) != 5)
+  // {
+  //   EEPROM.writeByte(1023, 5);
 
-  for (byte i = 0; i < PUPM_AMOUNT; i++)
-  {                                                          // пробегаем по всем помпам
-    _pumpPauseTimesInMinutes[i] = EEPROM.readLong(8 * i);    // читаем данные из памяти. На чётных - период (ч)
-    _pumpWorkTimesInMinutes[i] = EEPROM.readLong(8 * i + 4); // на нечётных - полив (с)
+  //   // для порядку сделаем 1 ячейки с 0 по 500
+  //   for (byte i = 0; i < 500; i += 4)
+  //   {
+  //     EEPROM.writeLong(i, 0);
+  //   }
+  // }
 
-    // вырубить все помпы
-    _pumpStates[i] = DEFAULT_PUMP_STATE;
-  }
+  // for (byte i = 0; i < PUPM_AMOUNT; i++)
+  // {
+  //   _pumpPauseTimesInMinutes[i] = EEPROM.readLong(8 * i);    // читаем данные из памяти. На чётных - период (ч)
+  //   _pumpWorkTimesInMinutes[i] = EEPROM.readLong(8 * i + 4); // на нечётных - полив (с)
+  //   _pumpStates[i] = DEFAULT_PUMP_STATE;
+  // }
 
-  // ---------------------- ВЫВОД НА ДИСПЛЕЙ ------------------------
   PrintSelectedPumpName();
   PrintDataAndUpdateArrowPosition();
 }
 
 void loop()
 {
-  button1.tick();
-  button2.tick();
+  _pumpButton1.tick();
+  _pumpButton2.tick();
+  _autoPumpEncoder.Tick();
 
-  HandleEncoderTick();
   CheckPumpsToWaterAndOnIfNeeded();
   CheckPumpsToWaterAndOffIfNeeded();
   TurnLcdOffIfNeeded();
