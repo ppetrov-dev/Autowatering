@@ -107,7 +107,7 @@ void AutoPumpLcd::MoveToPreviousCursorPosition()
 void AutoPumpLcd::ConstrainSelectedValues()
 {
     if (_selectedDays > 9)
-        _selectedDays = 9;
+        _selectedDays = 0;
     if (_selectedMinutes > 59)
         _selectedMinutes = 0;
     if (_selectedHours > 59)
