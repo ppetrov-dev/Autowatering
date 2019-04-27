@@ -10,12 +10,12 @@
 #include "enums.h"
 #include "converters.h"
 
-AutoPumpEncoder _autoPumpEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
-OneButton _pumpButton1(PIN_Button1, true);
-Pump _pump1(PIN_Pump1);
-OneButton _pumpButton2(PIN_Button2, true);
-Pump _pump2(PIN_Pump2);
-AutoPumpLcd _autoPumpLcd(16, 2, PUPM_AMOUNT);
+AutoPumpEncoder _autoPumpEncoder = AutoPumpEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
+OneButton _pumpButton1 = OneButton(PIN_Button1, true);
+Pump _pump1 = Pump(PIN_Pump1);
+OneButton _pumpButton2 = OneButton(PIN_Button2, true);
+Pump _pump2 = Pump(PIN_Pump2);
+AutoPumpLcd _autoPumpLcd = AutoPumpLcd(16, 2, PUPM_AMOUNT);
 
 Pump* _pumps[PUPM_AMOUNT];
 

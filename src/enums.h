@@ -12,9 +12,9 @@ enum LcdCursorPosition
   SelectPauseDays,
   SelectPauseHours,
   SelectPauseMinutes,
-  SelectWorkDays,
   SelectWorkHours,
-  SelectWorkMinutes
+  SelectWorkMinutes,
+  SelectWorkSeconds
 };
 
 #endif

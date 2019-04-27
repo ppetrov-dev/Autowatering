@@ -4,6 +4,8 @@
 #include "LCD_1602_RUS.h"
 #include "enums.h"
 #include "converters.h"
+#include "WorkTime.h"
+#include "PauseTime.h"
 
 class AutoPumpLcd
 {
@@ -16,15 +18,17 @@ private:
     byte _timeoutInSeconds = 30;
     enum LcdCursorPosition _cursorPosition;
     int _selectedPumpIndex = 0;
-    long _selectedDays = 0;
-    long _selectedHours = 0;
-    long _selectedMinutes = 10;
+
+    WorkTime _workTime = WorkTime(0, 0, 30);
+    PauseTime _pauseTime = PauseTime(1, 0, 0);
+
     byte _pumpAmount = 1;
 
-    void PrintArrowAndSetCursor(byte col, byte row);
-    void ConstrainSelectedValues();
     void ConstrainSelectedPumpIndex();
-
+    void ClearRow(byte rowIndex);
+    void UpdateArrowPosition();
+    void RedrawArrowSpots();
+    void SetCursorPosition(LcdCursorPosition cursorPosition);
     LcdCursorPosition GetNextCursorPosition();
     LcdCursorPosition GetPreviousCursorPosition();
 
