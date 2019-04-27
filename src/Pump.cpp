@@ -52,10 +52,10 @@ void Pump::SwitchOff()
 bool Pump::GetIsTimeToStopWatering(){
     auto currentMilliseconds = millis();
 
-    if(WorkTimeInMinutes == 0 || !_isWorking)
+    if(WorkTimeInSeconds == 0 || !_isWorking)
         return false;
        
-    auto workTimeInMilliseconds = Converters::MinutesToMilliseconds(WorkTimeInMinutes);
+    auto workTimeInMilliseconds = Converters::SecondsToMilliseconds(WorkTimeInSeconds);
     auto passedTimeinMilliseconds = currentMilliseconds - _timerInMilliseconds;
    
    return passedTimeinMilliseconds >= workTimeInMilliseconds;

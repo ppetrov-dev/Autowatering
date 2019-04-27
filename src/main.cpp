@@ -99,11 +99,11 @@ void UpdateSelectedPumpPauseOrWorkTime()
 {
   auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
   auto pump = _pumps[pumpIndex];
-  auto minutes = _autoPumpLcd.ConvertSelectedValuesToMinutes();
+  auto seconds = _autoPumpLcd.ConvertSelectedValuesToSeconds();
   if (_autoPumpLcd.GetIsWatchingPauseStates())
-      pump->PauseTimeInMinutes = minutes;
+      pump->PauseTimeInMinutes = Converters::SecondsToMinutes(seconds);
   else
-    pump->WorkTimeInMinutes = minutes;
+    pump->WorkTimeInSeconds = seconds;
 }
 
 void TryForceStartWatering(byte pumpIndex){
@@ -173,16 +173,17 @@ void UpdateSelectedValuesForPauseTimeOfSelectedPump(){
   auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
   auto pump = _pumps[pumpIndex];
   auto pauseTimeInMinutes = pump->PauseTimeInMinutes;
-
-  _autoPumpLcd.UpdateSelectedValuesFromMinutes(pauseTimeInMinutes);
+  
+  auto seconds = Converters::MinutesToSeconds(pauseTimeInMinutes);
+  _autoPumpLcd.UpdateSelectedValuesFromSeconds(seconds);
 }
 
 void UpdateSelectedValuesForWorkTimeOfSelectedPump(){
   auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
   auto pump = _pumps[pumpIndex];
-  auto workTimeInMinutes = pump->WorkTimeInMinutes;
- 
-  _autoPumpLcd.UpdateSelectedValuesFromMinutes(workTimeInMinutes);
+  auto workTimeInSeconds = pump->WorkTimeInSeconds;
+  
+  _autoPumpLcd.UpdateSelectedValuesFromSeconds(workTimeInSeconds);
 }
 
 void OnAutoPumpLcdCursorPositionChanged()

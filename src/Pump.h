@@ -15,7 +15,7 @@ private:
 
    
 public:
-    unsigned long WorkTimeInMinutes = 1;
+    unsigned long WorkTimeInSeconds = 30;
     unsigned long PauseTimeInMinutes = 10;
 
     Pump(byte pin);

@@ -125,20 +125,20 @@ void AutoPumpLcd::MoveToPreviousCursorPosition()
 }
 void AutoPumpLcd::ConstrainSelectedValues()
 {
-    if (_selectedDays > 9)
-        _selectedDays = 0;
-    if (_selectedDays < 0)
-        _selectedDays = 9;
-
-    if (_selectedHours > 59)
-        _selectedHours = 0;
-    if (_selectedHours < 0)
-        _selectedHours = 59;
-
     if (_selectedMinutes > 59)
         _selectedMinutes = 0;
     if (_selectedMinutes < 0)
         _selectedMinutes = 59;
+
+    if (_selectedHours > 23)
+        _selectedHours = 0;
+    if (_selectedHours < 0)
+        _selectedHours = 23;
+    
+    if (_selectedDays > 9)
+        _selectedDays = 0;
+    if (_selectedDays < 0)
+        _selectedDays = 9;
 }
 
 void AutoPumpLcd::ConstrainSelectedPumpIndex()
@@ -151,8 +151,8 @@ void AutoPumpLcd::ConstrainSelectedPumpIndex()
 
 void AutoPumpLcd::PrintArrowAndSetCursor(byte col, byte row)
 {
-    _lcd.setCursor(0, 0);
-    _lcd.print(" ");
+    _lcd.setCursor(4, 0);
+    _lcd.print("#");
     _lcd.setCursor(7, 1);
     _lcd.print(" ");
     _lcd.setCursor(10, 1);
@@ -172,7 +172,7 @@ void AutoPumpLcd::PrintDataAndUpdateArrowPosition()
     switch (_cursorPosition)
     {
     case SelectPump:
-        PrintArrowAndSetCursor(0, 0);
+        PrintArrowAndSetCursor(4, 0);
         break;
     case SelectPauseDays:
     case SelectWorkDays:
@@ -209,12 +209,12 @@ void AutoPumpLcd::PrintDataAndUpdateArrowPosition()
 
 void AutoPumpLcd::PrintSelectedPumpName()
 {
-    _lcd.setCursor(1, 0);
+    _lcd.setCursor(0, 0);
      char emptyString[_columnCount - 1];
     _lcd.print(emptyString);
-    _lcd.setCursor(1, 0);
-
-    _lcd.print("Pump #"+ String(_selectedPumpIndex + 1));
+    
+    _lcd.setCursor(0, 0);
+    _lcd.print("Pump#"+ String(_selectedPumpIndex + 1));
 }
 
 void AutoPumpLcd::UpdateSelectedValues(int increment)
@@ -248,16 +248,27 @@ void AutoPumpLcd::UpdateSelectedValues(int increment)
     }
 }
 
-unsigned long AutoPumpLcd::ConvertSelectedValuesToMinutes()
+unsigned long AutoPumpLcd::ConvertSelectedValuesToSeconds()
 {
-    return (_selectedDays * 1440 + _selectedHours * 60 + _selectedMinutes);
+    auto selectedDaysInSecond = Converters::DaysToSeconds(_selectedDays);
+    auto selectedHoursInSecond = Converters::HoursToSeconds(_selectedHours);
+    auto selectedMinutesInSecond = Converters::MinutesToSeconds(_selectedMinutes);
+    auto result = selectedDaysInSecond + selectedHoursInSecond+ selectedMinutesInSecond;
+
+    return result ;
 }
 
-void AutoPumpLcd::UpdateSelectedValuesFromMinutes(unsigned long minutes)
+void AutoPumpLcd::UpdateSelectedValuesFromSeconds(unsigned long seconds)
 {
-    _selectedDays = floor(minutes / 1440);
-    _selectedHours = floor((minutes - _selectedDays * 1440) / 60);
-    _selectedMinutes = floor(minutes - _selectedDays * 1440 - _selectedHours * 60);
+    auto days = Converters::SecondsToDays(seconds);
+    auto secondsWithoutDays= seconds - Converters::DaysToSeconds(days);
+    auto hours = Converters::SecondsToHour(secondsWithoutDays);
+    auto secondsWithoutDaysAndHours= secondsWithoutDays - Converters::HoursToSeconds(hours);
+    auto minutes = Converters::SecondsToMinutes(secondsWithoutDaysAndHours);
+
+    _selectedDays = days;
+    _selectedHours = hours;
+    _selectedMinutes = minutes;
 }
 
 void AutoPumpLcd::Refresh()

@@ -27,7 +27,7 @@ public:
     static unsigned long SecondsToHour(unsigned long seconds)
     {
         auto minutes = SecondsToMinutes(seconds);
-        return minutes * 60;
+        return minutes / 60;
     }
 
     static unsigned long SecondsToDays(unsigned long seconds)

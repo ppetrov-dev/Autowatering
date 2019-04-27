@@ -45,8 +45,8 @@ public:
     void MoveToNextCursorPosition();
     void MoveToPreviousCursorPosition();
     void UpdateSelectedValues(int increment);
-    unsigned long ConvertSelectedValuesToMinutes();
-    void UpdateSelectedValuesFromMinutes(unsigned long minutes);
+    unsigned long ConvertSelectedValuesToSeconds();
+    void UpdateSelectedValuesFromSeconds(unsigned long seconds);
     LcdCursorPosition GetCursorPosition();
     void Refresh();
     void Clear();
