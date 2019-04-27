@@ -8,13 +8,15 @@ enum StartTimerOption
 
 enum LcdCursorPosition
 {
-  SelectPump,
   SelectPauseDays,
   SelectPauseHours,
   SelectPauseMinutes,
   SelectWorkHours,
   SelectWorkMinutes,
-  SelectWorkSeconds
+  SelectWorkSeconds,
+  SelectPump,
+  SelectSettings,
+  SelectBack,
 };
 
 #endif

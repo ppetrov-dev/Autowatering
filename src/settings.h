@@ -1,12 +1,12 @@
-#include "enums.h"
-
 #ifndef settingsH
 #define settingsH
+
+#include "enums.h"
 
 #define IS_LCD_AUTO_OFF 1
 #define Lcd_TIMEOUT_SECONDS 30
 #define ENCODER_TYPE 0 // тип энкодера (0 или 1). Если энкодер работает некорректно (пропуск шагов), смените тип
-#define IS_ENCODER_REVERSED 0
+#define IS_ENCODER_REVERSED 1
 #define DEFAULT_PUMP_STATE 0 // реле: 1 - высокого уровня (или мосфет), 0 - низкого
 
 #define PIN_EncoderClk 2

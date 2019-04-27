@@ -15,11 +15,12 @@ private:
     callbackFunction _onLeftTurnCallbackFunc = NULL;
     callbackFunction _onRightHoldTurnCallbackFunc = NULL;
     callbackFunction _onLeftHoldTurnCallbackFunc = NULL;
-
+    callbackFunction _onClickCallbackFunc = NULL;
 public:
     AutoPumpEncoder(byte pinClk, byte pinDt, byte pinSw);
     bool IsHold();
     void Tick(void);
+    void AttachOnClick(callbackFunction newFunction);
     void AttachOnAnyTurn(callbackFunction newFunction);
     void AttachOnRightTurn(callbackFunction newFunction);
     void AttachOnLeftTurn(callbackFunction newFunction);

@@ -7,33 +7,19 @@ AutoPumpLcd::AutoPumpLcd(byte columnCount, byte rowCount, byte pumpAmount) : _lc
     _rowCount = rowCount;
 }
 
-void AutoPumpLcd::SetTimeoutInSeconds(byte seconds)
-{
-    _timeoutInSeconds = seconds;
-}
-
-byte AutoPumpLcd::GetTimeoutInSeconds()
-{
-    return _timeoutInSeconds;
-}
-
-void AutoPumpLcd::SetIsAutoOff(bool isAutoOff)
-{
-    _isAutoOff = isAutoOff;
-}
-bool AutoPumpLcd::GetIsAutoOff()
-{
-    return _isAutoOff;
-}
-
-bool AutoPumpLcd::GetIsOn()
-{
-    return _isOn;
-}
-
 void AutoPumpLcd::Clear()
 {
     _lcd.clear();
+}
+
+void AutoPumpLcd::GoToSettings()
+{
+    SetCursorPosition(SelectBack);
+}
+
+void AutoPumpLcd::LeaveSettings()
+{
+    SetCursorPosition(SelectSettings);
 }
 
 LcdCursorPosition AutoPumpLcd::GetCursorPosition()
@@ -61,6 +47,11 @@ LcdCursorPosition AutoPumpLcd::GetNextCursorPosition()
     switch (_cursorPosition)
     {
     case SelectPump:
+        return SelectSettings;
+    case SelectSettings:
+        return SelectPump;
+
+    case SelectBack:
         return SelectPauseDays;
     case SelectPauseDays:
         return SelectPauseHours;
@@ -73,7 +64,7 @@ LcdCursorPosition AutoPumpLcd::GetNextCursorPosition()
     case SelectWorkMinutes:
         return SelectWorkSeconds;
     case SelectWorkSeconds:
-        return SelectPump;
+        return SelectBack;
     }
 }
 
@@ -82,9 +73,13 @@ LcdCursorPosition AutoPumpLcd::GetPreviousCursorPosition()
     switch (_cursorPosition)
     {
     case SelectPump:
+        return SelectSettings;
+    case SelectSettings:
+        return SelectPump;
+    case SelectBack:
         return SelectWorkSeconds;
     case SelectPauseDays:
-        return SelectPump;
+        return SelectBack;
     case SelectPauseHours:
         return SelectPauseDays;
     case SelectPauseMinutes:
@@ -98,27 +93,61 @@ LcdCursorPosition AutoPumpLcd::GetPreviousCursorPosition()
     }
 }
 
-bool AutoPumpLcd::GetIsWatchingPauseStates()
+bool AutoPumpLcd::GetAreSettingsMenuOpened()
 {
-
     switch (_cursorPosition)
     {
     case SelectPump:
+    case SelectSettings:
+        return false;
+    default:
+        return true;
+    }
+}
+
+bool AutoPumpLcd::GetArePauseSettingsOpened()
+{
+    switch (_cursorPosition)
+    {
     case SelectPauseDays:
     case SelectPauseHours:
     case SelectPauseMinutes:
         return true;
-    case SelectWorkHours:
-    case SelectWorkMinutes:
-    case SelectWorkSeconds:
-        return false;
     default:
         return false;
     }
 }
 
+bool AutoPumpLcd::GetAreWorkSettingsOpened()
+{
+    switch (_cursorPosition)
+    {
+    case SelectWorkHours:
+    case SelectWorkMinutes:
+    case SelectWorkSeconds:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool AutoPumpLcd::TryUpdateActivityTimeAndSwitchOnIfNeeded()
+{
+    _lastActivityTimeInMilliseconds = millis();
+    if (!_isOn)
+    {
+        SwitchOn();
+        return false;
+    }
+
+    return true;
+}
+
 void AutoPumpLcd::SetCursorPosition(LcdCursorPosition cursorPosition)
 {
+    if (!TryUpdateActivityTimeAndSwitchOnIfNeeded())
+        return;
+
     _cursorPosition = cursorPosition;
     UpdateArrowPosition();
 }
@@ -155,10 +184,15 @@ void AutoPumpLcd::ClearRow(byte rowIndex)
     _lcd.setCursor(0, rowIndex);
 }
 
-void AutoPumpLcd::RedrawArrowSpots(){
-     _lcd.setCursor(4, 0);
+void AutoPumpLcd::RedrawArrowSpots()
+{
+    _lcd.setCursor(4, 0);
     _lcd.print("#");
-     _lcd.setCursor(7, 1);
+    _lcd.setCursor(7, 0);
+    _lcd.print(" ");
+    _lcd.setCursor(11, 0);
+    _lcd.print(" ");
+    _lcd.setCursor(7, 1);
     _lcd.print(" ");
     _lcd.setCursor(10, 1);
     _lcd.print(":");
@@ -166,44 +200,59 @@ void AutoPumpLcd::RedrawArrowSpots(){
     _lcd.print(":");
 }
 
-void AutoPumpLcd::UpdateArrowPosition(){
+void AutoPumpLcd::UpdateArrowPosition()
+{
     RedrawArrowSpots();
 
     switch (_cursorPosition)
     {
     case SelectPump:
-         _lcd.setCursor(4, 0);
+        _lcd.setCursor(4, 0);
         break;
     case SelectPauseDays:
     case SelectWorkHours:
-         _lcd.setCursor(7, 1);
+        _lcd.setCursor(7, 1);
         break;
     case SelectPauseHours:
     case SelectWorkMinutes:
-         _lcd.setCursor(10, 1);
+        _lcd.setCursor(10, 1);
         break;
     case SelectPauseMinutes:
     case SelectWorkSeconds:
-         _lcd.setCursor(13, 1);
+        _lcd.setCursor(13, 1);
+        break;
+    case SelectSettings:
+        _lcd.setCursor(7, 0);
+        break;
+    case SelectBack:
+        _lcd.setCursor(11, 0);
         break;
     }
     _lcd.write(126);
 }
 
+void AutoPumpLcd::PrintSelectedPumpName()
+{
+    ClearRow(0);
+    _lcd.print("Pump#" + String(_selectedPumpIndex + 1));
+    _lcd.setCursor(8, 0);
+    _lcd.print("settings");
+}
+
 void AutoPumpLcd::PrintDataAndUpdateArrowPosition()
 {
-    ClearRow(1);
+    // ClearRow(1);
 
-    if (GetIsWatchingPauseStates())
+    if (GetArePauseSettingsOpened())
     {
         _lcd.print("pause");
 
         auto days = _pauseTime.GetDays();
-        _lcd.setCursor(8, 1);  
+        _lcd.setCursor(8, 1);
         _lcd.print(days);
         _lcd.print("d");
         _lcd.print(" ");
-        
+
         auto hours = _pauseTime.GetHours();
         _lcd.setCursor(11, 1);
         if (hours < 10)
@@ -218,7 +267,7 @@ void AutoPumpLcd::PrintDataAndUpdateArrowPosition()
     }
     else
     {
-        _lcd.print("work");
+        _lcd.print("work ");
 
         auto hours = _workTime.GetHours();
         _lcd.setCursor(8, 1);
@@ -242,14 +291,15 @@ void AutoPumpLcd::PrintDataAndUpdateArrowPosition()
     UpdateArrowPosition();
 }
 
-void AutoPumpLcd::PrintSelectedPumpName()
-{
-    ClearRow(0);
-    _lcd.print("Pump#" + String(_selectedPumpIndex + 1));
+void AutoPumpLcd::AttachOnCursorPositionChanged(callbackFunction newFunction){
+    _onCursorPositionChangedCallbackFunc = newFunction;
 }
 
 void AutoPumpLcd::UpdateSelectedValues(int increment)
 {
+    if (!TryUpdateActivityTimeAndSwitchOnIfNeeded())
+        return;
+
     if (_cursorPosition == SelectPump)
     {
         _selectedPumpIndex += increment;
@@ -283,19 +333,23 @@ void AutoPumpLcd::UpdateSelectedValues(int increment)
     }
 }
 
-unsigned long AutoPumpLcd::ConvertSelectedValuesToSeconds()
+unsigned long AutoPumpLcd::ConvertWorkTimeToSeconds()
 {
-    auto isPauseStates = GetIsWatchingPauseStates();
-    return isPauseStates ? _pauseTime.ToSeconds() : _workTime.ToSeconds();
+    return _workTime.ToSeconds();
+}
+unsigned long AutoPumpLcd::ConvertPauseTimeToSeconds()
+{
+    return _pauseTime.ToSeconds();
 }
 
-void AutoPumpLcd::UpdateSelectedValuesFromSeconds(unsigned long seconds)
+void AutoPumpLcd::UpdateWorkTimeFromSeconds(unsigned long seconds)
 {
-    auto isPauseStates = GetIsWatchingPauseStates();
-    if (isPauseStates)
-        _pauseTime.UpdateValuesFromSeconds(seconds);
-    else
-        _workTime.UpdateValuesFromSeconds(seconds);
+    _workTime.UpdateValuesFromSeconds(seconds);
+}
+
+void AutoPumpLcd::UpdatePauseTimeFromSeconds(unsigned long seconds)
+{
+    _pauseTime.UpdateValuesFromSeconds(seconds);
 }
 
 void AutoPumpLcd::Refresh()
@@ -303,4 +357,19 @@ void AutoPumpLcd::Refresh()
     Clear();
     PrintSelectedPumpName();
     PrintDataAndUpdateArrowPosition();
+    SwitchOn();
+}
+
+bool AutoPumpLcd::GetIsLcdTimeoutExpired()
+{
+    auto timeoutInMilliseconds = Converters::SecondsToMilliseconds(TimeoutInSeconds);
+    return millis() - _lastActivityTimeInMilliseconds >= timeoutInMilliseconds;
+}
+
+void AutoPumpLcd::Tick()
+{
+    if (!IsAutoOff || !_isOn || !GetIsLcdTimeoutExpired())
+        return;
+
+    SwitchOff();
 }

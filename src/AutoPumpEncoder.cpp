@@ -38,6 +38,10 @@ void AutoPumpEncoder::AttachOnRightHoldTurn(callbackFunction newFunction)
 {
     _onRightHoldTurnCallbackFunc = newFunction;
 }
+void AutoPumpEncoder::AttachOnClick(callbackFunction newFunction)
+{
+    _onClickCallbackFunc = newFunction;
+}
 bool AutoPumpEncoder::IsHold()
 {
     return _encoder.isPress();
@@ -60,4 +64,7 @@ void AutoPumpEncoder::Tick()
 
     if (_encoder.isLeftH() && _onLeftHoldTurnCallbackFunc != NULL)
         _onLeftHoldTurnCallbackFunc();
+    
+    if(_encoder.isClick() && _onClickCallbackFunc!= NULL)
+        _onClickCallbackFunc();
 }

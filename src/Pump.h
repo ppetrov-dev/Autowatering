@@ -1,7 +1,11 @@
+#ifndef arduinoH
+#define arduinoH
+#include <Arduino.h>
+#endif
+
 #ifndef pumpH
 #define pumpH
 
-#include <Arduino.h>
 #include "enums.h"
 #include "converters.h"
 
