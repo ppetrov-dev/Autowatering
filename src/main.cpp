@@ -8,6 +8,7 @@
 #include "Pump.h"
 #include "settings.h"
 #include "enums.h"
+#include "converters.h"
 
 AutoPumpEncoder _autoPumpEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
 OneButton _pumpButton1(PIN_Button1, true);
@@ -31,7 +32,7 @@ void UpdateDataInMemoryForSelectedPump()
 bool IsLcdTimeoutExpired()
 {
   auto _lcdTimeoutInSeconds = _autoPumpLcd.GetTimeoutInSeconds();
-  auto lcdTimeoutInMilliseconds = ConvertSecondsToMilliseconds(_lcdTimeoutInSeconds);
+  auto lcdTimeoutInMilliseconds = Converters::SecondsToMilliseconds(_lcdTimeoutInSeconds);
   return millis() - _lastEncoderActivityTimeInMilliseconds >= lcdTimeoutInMilliseconds;
 }
 

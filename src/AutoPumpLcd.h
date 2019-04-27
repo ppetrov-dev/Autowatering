@@ -3,6 +3,7 @@
 
 #include "LCD_1602_RUS.h"
 #include "enums.h"
+#include "converters.h"
 
 class AutoPumpLcd
 {
