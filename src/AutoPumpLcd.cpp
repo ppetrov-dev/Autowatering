@@ -1,7 +1,8 @@
 #include "AutoPumpLcd.h"
 
-AutoPumpLcd::AutoPumpLcd(uint8_t columnCount, uint8_t rowCount) : _lcd(0x27, columnCount, rowCount)
+AutoPumpLcd::AutoPumpLcd(byte columnCount, byte rowCount, byte pumpAmount) : _lcd(0x27, columnCount, rowCount)
 {
+    _pumpAmount = pumpAmount;
     _columnCount = columnCount;
     _rowCount = rowCount;
 }
@@ -126,16 +127,18 @@ void AutoPumpLcd::ConstrainSelectedValues()
 {
     if (_selectedDays > 9)
         _selectedDays = 0;
-    if (_selectedMinutes > 59)
-        _selectedMinutes = 0;
-    if (_selectedHours > 59)
-        _selectedHours = 0;
-    if (_selectedMinutes < 0)
-        _selectedMinutes = 59;
-    if (_selectedHours < 0)
-        _selectedHours = 59;
     if (_selectedDays < 0)
         _selectedDays = 9;
+
+    if (_selectedHours > 59)
+        _selectedHours = 0;
+    if (_selectedHours < 0)
+        _selectedHours = 59;
+
+    if (_selectedMinutes > 59)
+        _selectedMinutes = 0;
+    if (_selectedMinutes < 0)
+        _selectedMinutes = 59;
 }
 
 void AutoPumpLcd::ConstrainSelectedPumpIndex()
@@ -160,7 +163,7 @@ void AutoPumpLcd::PrintArrowAndSetCursor(byte col, byte row)
     _lcd.write(126);
 }
 
-byte AutoPumpLcd::GetSelectedPumpIndex(){
+int AutoPumpLcd::GetSelectedPumpIndex(){
     return _selectedPumpIndex;
 }
 
@@ -187,9 +190,9 @@ void AutoPumpLcd::PrintDataAndUpdateArrowPosition()
     _lcd.setCursor(0, 1);
 
     if (GetIsWatchingPauseStates())
-        _lcd.print("PAUSE ");
+        _lcd.print("pause ");
     else
-        _lcd.print("WORK  ");
+        _lcd.print("work  ");
 
     _lcd.setCursor(8, 1);
     _lcd.print(_selectedDays);
@@ -207,9 +210,11 @@ void AutoPumpLcd::PrintDataAndUpdateArrowPosition()
 void AutoPumpLcd::PrintSelectedPumpName()
 {
     _lcd.setCursor(1, 0);
-    _lcd.print("                ");
+     char emptyString[_columnCount - 1];
+    _lcd.print(emptyString);
     _lcd.setCursor(1, 0);
-    _lcd.print(_pumpNames[_selectedPumpIndex]);
+
+    _lcd.print("Pump #"+ String(_selectedPumpIndex + 1));
 }
 
 void AutoPumpLcd::UpdateSelectedValues(int increment)
@@ -221,27 +226,38 @@ void AutoPumpLcd::UpdateSelectedValues(int increment)
     }
     else
     {
-        if (_cursorPosition == SelectPauseDays || _cursorPosition == SelectWorkDays)
+        switch (_cursorPosition)
+        {
+        case SelectPauseDays:
+        case SelectWorkDays:
             _selectedDays += increment;
-        else if (_cursorPosition == SelectPauseHours || _cursorPosition == SelectWorkHours)
+            break;
+        case SelectPauseHours:
+        case SelectWorkHours:
             _selectedHours += increment;
-        else if (_cursorPosition == SelectPauseMinutes || _cursorPosition == SelectWorkMinutes)
+            break;
+        case SelectPauseMinutes:
+        case SelectWorkMinutes:
             _selectedMinutes += increment;
+            break;
+        default:
+            break;
+        }
 
         ConstrainSelectedValues();
     }
 }
 
-uint32_t AutoPumpLcd::ConvertSelectedValuesToMinutes()
+unsigned long AutoPumpLcd::ConvertSelectedValuesToMinutes()
 {
-    return ((long)_selectedDays * 1440 + (long)_selectedHours * 60 + _selectedMinutes);
+    return (_selectedDays * 1440 + _selectedHours * 60 + _selectedMinutes);
 }
 
-void AutoPumpLcd::UpdateSelectedValuesFromMinutes(uint32_t minutes)
+void AutoPumpLcd::UpdateSelectedValuesFromMinutes(unsigned long minutes)
 {
-    _selectedDays = floor((long)minutes / 1440);
-    _selectedHours = floor((minutes - (long)_selectedDays * 1440) / 60);
-    _selectedMinutes = floor(minutes - (long)_selectedDays * 1440 - (long)_selectedHours * 60);
+    _selectedDays = floor(minutes / 1440);
+    _selectedHours = floor((minutes - _selectedDays * 1440) / 60);
+    _selectedMinutes = floor(minutes - _selectedDays * 1440 - _selectedHours * 60);
 }
 
 void AutoPumpLcd::Refresh()

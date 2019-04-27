@@ -8,19 +8,17 @@ class AutoPumpLcd
 {
 private:
     LCD_1602_RUS _lcd;
-    uint8_t _columnCount;
-    uint8_t _rowCount;
+    byte _columnCount;
+    byte _rowCount;
     bool _isOn;
     bool _isAutoOff = true;
     byte _timeoutInSeconds = 30;
     enum LcdCursorPosition _cursorPosition;
-    byte _selectedPumpIndex = 0;
-    int8_t _selectedDays = 0;
-    int8_t _selectedHours = 0;
-    int8_t _selectedMinutes = 10;
-    String _pumpNames[2] = {"Pump 1",
-                            "Pump 2"};
-    byte _pumpAmount = 2;
+    int _selectedPumpIndex = 0;
+    long _selectedDays = 0;
+    long _selectedHours = 0;
+    long _selectedMinutes = 10;
+    byte _pumpAmount = 1;
 
     void PrintArrowAndSetCursor(byte col, byte row);
     void ConstrainSelectedValues();
@@ -30,12 +28,12 @@ private:
     LcdCursorPosition GetPreviousCursorPosition();
 
 public:
-    AutoPumpLcd(uint8_t columnCount, uint8_t rowCount);
+    AutoPumpLcd(byte columnCount, byte rowCount, byte pumpAmount);
     void Init();
     void SetTimeoutInSeconds(byte seconds);
     byte GetTimeoutInSeconds();
     bool GetIsWatchingPauseStates();
-    byte GetSelectedPumpIndex();
+    int GetSelectedPumpIndex();
     void SetIsAutoOff(bool isAutoOff);
     bool GetIsAutoOff();
     bool GetIsOn();
@@ -46,8 +44,8 @@ public:
     void MoveToNextCursorPosition();
     void MoveToPreviousCursorPosition();
     void UpdateSelectedValues(int increment);
-    uint32_t ConvertSelectedValuesToMinutes();
-    void UpdateSelectedValuesFromMinutes(uint32_t minutes);
+    unsigned long ConvertSelectedValuesToMinutes();
+    void UpdateSelectedValuesFromMinutes(unsigned long minutes);
     LcdCursorPosition GetCursorPosition();
     void Refresh();
     void Clear();

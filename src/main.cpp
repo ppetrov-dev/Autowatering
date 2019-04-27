@@ -14,7 +14,7 @@ OneButton _pumpButton1(PIN_Button1, true);
 Pump _pump1(PIN_Pump1);
 OneButton _pumpButton2(PIN_Button2, true);
 Pump _pump2(PIN_Pump2);
-AutoPumpLcd _autoPumpLcd(16, 2);
+AutoPumpLcd _autoPumpLcd(16, 2, PUPM_AMOUNT);
 
 Pump* _pumps[PUPM_AMOUNT];
 
@@ -100,9 +100,9 @@ void UpdateSelectedPumpPauseOrWorkTime()
   auto pump = _pumps[pumpIndex];
   auto minutes = _autoPumpLcd.ConvertSelectedValuesToMinutes();
   if (_autoPumpLcd.GetIsWatchingPauseStates())
-      pump->SetPauseTimeInMinutes(minutes);
+      pump->PauseTimeInMinutes = minutes;
   else
-    pump->SetWorkTimeInMinutes(minutes);
+    pump->WorkTimeInMinutes = minutes;
 }
 
 void TryForceStartWatering(byte pumpIndex){
@@ -171,7 +171,7 @@ void ExcecuteIfLcdIsOn(void (*function)(void))
 void UpdateSelectedValuesForPauseTimeOfSelectedPump(){
   auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
   auto pump = _pumps[pumpIndex];
-  auto pauseTimeInMinutes = pump->GetPauseTimeInMinutes();
+  auto pauseTimeInMinutes = pump->PauseTimeInMinutes;
 
   _autoPumpLcd.UpdateSelectedValuesFromMinutes(pauseTimeInMinutes);
 }
@@ -179,7 +179,7 @@ void UpdateSelectedValuesForPauseTimeOfSelectedPump(){
 void UpdateSelectedValuesForWorkTimeOfSelectedPump(){
   auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
   auto pump = _pumps[pumpIndex];
-  auto workTimeInMinutes = pump->GetWorkTimeInMinutes();
+  auto workTimeInMinutes = pump->WorkTimeInMinutes;
  
   _autoPumpLcd.UpdateSelectedValuesFromMinutes(workTimeInMinutes);
 }
