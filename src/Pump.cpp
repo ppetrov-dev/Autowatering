@@ -40,23 +40,35 @@ void Pump::SwitchOff()
  bool Pump::GetIsTimeForWatering(){
       auto currentMilliseconds = millis();
 
-    if(PauseTimeInMinutes == 0 || _isWorking)
+    if(_pauseTimeInMinutes == 0 || _isWorking)
         return false;
        
-    auto pauseTimeInMilliseconds = ConvertMinutesToMilliseconds(PauseTimeInMinutes);
+    auto pauseTimeInMilliseconds = ConvertMinutesToMilliseconds(_pauseTimeInMinutes);
     auto passedTimeinMilliseconds = currentMilliseconds - _timerInMilliseconds;
    
-   return passedTimeinMilliseconds < pauseTimeInMilliseconds;
+   return passedTimeinMilliseconds >= pauseTimeInMilliseconds;
 }
 
 bool Pump::GetIsTimeToStopWatering(){
     auto currentMilliseconds = millis();
 
-    if(WorkTimeInMinutes == 0 || !_isWorking)
+    if(_workTimeInMinutes == 0 || !_isWorking)
         return false;
        
-    auto workTimeInMilliseconds = ConvertMinutesToMilliseconds(WorkTimeInMinutes);
+    auto workTimeInMilliseconds = ConvertMinutesToMilliseconds(_workTimeInMinutes);
     auto passedTimeinMilliseconds = currentMilliseconds - _timerInMilliseconds;
    
    return passedTimeinMilliseconds >= workTimeInMilliseconds;
+}
+uint32_t Pump::GetWorkTimeInMinutes(){
+    return _workTimeInMinutes;
+}
+void Pump::SetWorkTimeInMinutes(uint32_t minutes){
+     _workTimeInMinutes = minutes;
+}
+uint32_t Pump::GetPauseTimeInMinutes(){
+    return _pauseTimeInMinutes;
+}
+void Pump::SetPauseTimeInMinutes(uint32_t minutes){
+     _pauseTimeInMinutes = minutes;
 }

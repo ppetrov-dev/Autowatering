@@ -96,6 +96,24 @@ LcdCursorPosition AutoPumpLcd::GetPreviousCursorPosition()
         return SelectWorkHours;
     }
 }
+
+bool AutoPumpLcd::GetIsWatchingPauseStates(){
+
+    switch (_cursorPosition)
+    {
+        case SelectPump:
+        case SelectPauseDays:
+        case SelectPauseHours:
+        case SelectPauseMinutes:
+            return true;
+        case SelectWorkDays:
+        case SelectWorkHours:
+        case SelectWorkMinutes:
+            return false;
+        default:
+            return false;
+    }
+}
 void AutoPumpLcd::MoveToNextCursorPosition()
 {
     _cursorPosition = GetNextCursorPosition();
@@ -142,8 +160,8 @@ void AutoPumpLcd::PrintArrowAndSetCursor(byte col, byte row)
     _lcd.write(126);
 }
 
-bool AutoPumpLcd::GetIsWatchingPauseStates(){
-return _cursorPosition < SelectWorkDays;
+byte AutoPumpLcd::GetSelectedPumpIndex(){
+    return _selectedPumpIndex;
 }
 
 void AutoPumpLcd::PrintDataAndUpdateArrowPosition()

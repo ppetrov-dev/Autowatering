@@ -9,16 +9,14 @@
 #include "settings.h"
 #include "enums.h"
 
-AutoPumpEncoder _autoPumpEncoder(PIN_encoderClk, PIN_encoderDt, PIN_encoderSw);
+AutoPumpEncoder _autoPumpEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
 OneButton _pumpButton1(PIN_Button1, true);
 Pump _pump1(PIN_Pump1);
 OneButton _pumpButton2(PIN_Button2, true);
 Pump _pump2(PIN_Pump2);
 AutoPumpLcd _autoPumpLcd(16, 2);
 
-Pump _pumps[]{
-    _pump1,
-    _pump2};
+Pump* _pumps[PUPM_AMOUNT];
 
 bool _isWatering;
 
@@ -49,14 +47,14 @@ void SwitchPumpOn(byte pumpIndex)
 {
   _isWatering = true;
   auto pump = _pumps[pumpIndex];
-  pump.SwitchOn();
+  pump->SwitchOn();
   Serial.println("Pump #" + String(pumpIndex + 1) + " ON");
 }
 
 void SwitchPumpOff(byte pumpIndex)
 {
   auto pump = _pumps[pumpIndex];
-  pump.SwitchOff();
+  pump->SwitchOff();
    Serial.println("Pump #" + String(pumpIndex + 1) + " OFF");
   _isWatering = false;
 }
@@ -69,12 +67,13 @@ void CheckPumpsToWaterAndOnIfNeeded()
   for (byte pumpIndex = 0; pumpIndex < PUPM_AMOUNT; pumpIndex++)
   {
     auto pump = _pumps[pumpIndex];
-    auto isTimeForWatering = pump.GetIsTimeForWatering();
+    auto isTimeForWatering = pump->GetIsTimeForWatering();
 
-    if(!isTimeForWatering)
-      continue;
-
-    SwitchPumpOn(pumpIndex);
+    if(isTimeForWatering)
+      {
+        SwitchPumpOn(pumpIndex);
+        break;
+      }
   }
 }
 
@@ -86,7 +85,7 @@ void CheckPumpsToWaterAndOffIfNeeded()
 for (byte pumpIndex = 0; pumpIndex < PUPM_AMOUNT; pumpIndex++)
   {
     auto pump = _pumps[pumpIndex];
-    auto isTimeToStopWatering = pump.GetIsTimeToStopWatering();
+    auto isTimeToStopWatering = pump->GetIsTimeToStopWatering();
 
     if(!isTimeToStopWatering)
       continue;
@@ -95,15 +94,15 @@ for (byte pumpIndex = 0; pumpIndex < PUPM_AMOUNT; pumpIndex++)
   }
 }
 
-void UpdatePauseOrWorkTimeToSaveInMemory()
+void UpdateSelectedPumpPauseOrWorkTime()
 {
-  // uint32_t newTime = ConvertSelectedDaysHoursMinutesToMinutes();
-  // bool isNewPauseTime = _lcdCursorPosition < SelectWorkDays;
-
-  // if (isNewPauseTime)
-  //   _pumpPauseTimesInMinutes[_selectedPumpNumber] = newTime;
-  // else
-  //   _pumpWorkTimesInMinutes[_selectedPumpNumber] = newTime;
+  auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
+  auto pump = _pumps[pumpIndex];
+  auto minutes = _autoPumpLcd.ConvertSelectedValuesToMinutes();
+  if (_autoPumpLcd.GetIsWatchingPauseStates())
+      pump->SetPauseTimeInMinutes(minutes);
+  else
+    pump->SetWorkTimeInMinutes(minutes);
 }
 
 void TryForceStartWatering(byte pumpIndex){
@@ -169,16 +168,28 @@ void ExcecuteIfLcdIsOn(void (*function)(void))
   _autoPumpLcd.PrintDataAndUpdateArrowPosition();
 }
 
+void UpdateSelectedValuesForPauseTimeOfSelectedPump(){
+  auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
+  auto pump = _pumps[pumpIndex];
+  auto pauseTimeInMinutes = pump->GetPauseTimeInMinutes();
+
+  _autoPumpLcd.UpdateSelectedValuesFromMinutes(pauseTimeInMinutes);
+}
+
+void UpdateSelectedValuesForWorkTimeOfSelectedPump(){
+  auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
+  auto pump = _pumps[pumpIndex];
+  auto workTimeInMinutes = pump->GetWorkTimeInMinutes();
+ 
+  _autoPumpLcd.UpdateSelectedValuesFromMinutes(workTimeInMinutes);
+}
+
 void OnAutoPumpLcdCursorPositionChanged()
 {
   if (_autoPumpLcd.GetIsWatchingPauseStates())
-  {
-    //_autoPumpLcd.UpdateSelectedValuesFromMinutes(_pumpPauseTimesInMinutes[_selectedPumpIndex]);
-  }
+      UpdateSelectedValuesForPauseTimeOfSelectedPump();
   else
-  {
-    //_autoPumpLcd.UpdateSelectedValuesFromMinutes(_pumpWorkTimesInMinutes[_selectedPumpIndex]);
-  }
+    UpdateSelectedValuesForWorkTimeOfSelectedPump();
 }
 
 void OnAutoPumpEncoderLeftTurn()
@@ -198,17 +209,15 @@ void OnAutoPumpEncoderRightTurn()
     OnAutoPumpLcdCursorPositionChanged();
   });
 }
-
 void OnAutoPumpLcdSelectedValuesChangedWhenHold()
 {
   if (_autoPumpLcd.GetCursorPosition() == SelectPump)
   {
     _autoPumpLcd.PrintSelectedPumpName();
-    // uint32_t selectedPumpSavedMinutes = _pumpPauseTimesInMinutes[_selectedPumpIndex];
-    // _autoPumpLcd.UpdateSelectedValuesFromMinutes(selectedPumpSavedMinutes);
+    UpdateSelectedValuesForPauseTimeOfSelectedPump();
   }
   else
-    UpdatePauseOrWorkTimeToSaveInMemory();
+    UpdateSelectedPumpPauseOrWorkTime();
 }
 
 void OnAutoPumpEncoderLeftHoldTurn()
@@ -241,11 +250,14 @@ void setup()
   _pumpButton2.attachLongPressStart(OnLongPressButton2Start);
   _pumpButton2.attachLongPressStop(OnLongPressButton2Stop);
   
+  _pumps[0] = &_pump1;
+  _pumps[1] = &_pump2;
+
   for (byte i = 0; i < PUPM_AMOUNT; i++)
   {
     auto pump = _pumps[i];
-    pump.Init();
-    pump.SetStartTimerOption(START_TIMER_OPTION);
+    pump->Init();
+    pump->SetStartTimerOption(START_TIMER_OPTION);
   }
 
   _autoPumpEncoder.SetEncoderType(ENCODER_TYPE);

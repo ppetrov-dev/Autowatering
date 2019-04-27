@@ -16,4 +16,5 @@ enum LcdCursorPosition
   SelectWorkHours,
   SelectWorkMinutes
 };
+
 #endif

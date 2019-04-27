@@ -14,7 +14,7 @@ private:
     bool _isAutoOff = true;
     byte _timeoutInSeconds = 30;
     enum LcdCursorPosition _cursorPosition;
-    int8_t _selectedPumpIndex = 0;
+    byte _selectedPumpIndex = 0;
     int8_t _selectedDays = 0;
     int8_t _selectedHours = 0;
     int8_t _selectedMinutes = 10;
@@ -35,6 +35,7 @@ public:
     void SetTimeoutInSeconds(byte seconds);
     byte GetTimeoutInSeconds();
     bool GetIsWatchingPauseStates();
+    byte GetSelectedPumpIndex();
     void SetIsAutoOff(bool isAutoOff);
     bool GetIsAutoOff();
     bool GetIsOn();
