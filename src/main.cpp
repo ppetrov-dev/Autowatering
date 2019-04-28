@@ -8,11 +8,13 @@
 
 #include "AutoPumpEncoder.h"
 #include "AutoPumpLcd.h"
+#include "AutoPumpStateMachine.h"
 #include "Pump.h"
 #include "settings.h"
 #include "enums.h"
 #include "converters.h"
 
+AutoPumpStateMachine _autoPumpStateMachine;
 AutoPumpEncoder _autoPumpEncoder = AutoPumpEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
 OneButton _pumpButton1 = OneButton(PIN_Button1, true);
 Pump _pump1 = Pump(PIN_Pump1);
@@ -87,7 +89,7 @@ void UpdateSelectedPumpPauseAndWorkTime()
   auto pump = _pumps[pumpIndex];
   auto workTimeInSeconds = _autoPumpLcd.ConvertWorkTimeToSeconds();
   auto pauseTimeInSeconds = _autoPumpLcd.ConvertPauseTimeToSeconds();
-  
+
   pump->WorkTimeInSeconds = workTimeInSeconds;
   pump->PauseTimeInMinutes = Converters::SecondsToMinutes(pauseTimeInSeconds);
 }
@@ -114,114 +116,90 @@ void TryForceStopWatering(byte pumpIndex)
   SwitchPumpOff(pumpIndex);
 }
 
+#pragma region PumpButtons Handers
+
 void OnLongPressButton1Start()
 {
-  Serial.println("OnLongPressButton1Start");
   TryForceStartWatering(0);
 }
 void OnLongPressButton1Stop()
 {
-  Serial.println("OnLongPressButton1Stop");
   TryForceStopWatering(0);
 }
 void OnLongPressButton2Start()
 {
-  Serial.println("OnLongPressButton2Start");
   TryForceStartWatering(1);
 }
 void OnLongPressButton2Stop()
 {
-  Serial.println("OnLongPressButton2Stop");
   TryForceStopWatering(1);
 }
 
-void UpdateSelectedValuesForPauseTimeOfSelectedPump()
-{
-  auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
-  auto pump = _pumps[pumpIndex];
-  auto pauseTimeInMinutes = pump->PauseTimeInMinutes;
+#pragma endregion
 
-  auto seconds = Converters::MinutesToSeconds(pauseTimeInMinutes);
-  _autoPumpLcd.UpdatePauseTimeFromSeconds(seconds);
-}
-
-void UpdateSelectedValuesForWorkTimeOfSelectedPump()
-{
-  auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
-  auto pump = _pumps[pumpIndex];
-  auto workTimeInSeconds = pump->WorkTimeInSeconds;
-
-  _autoPumpLcd.UpdateWorkTimeFromSeconds(workTimeInSeconds);
-}
-
-void OnAutoPumpLcdCursorPositionChanged()
-{
-  if(!_autoPumpLcd.GetAreSettingsMenuOpened())
-    return;
-
-  if (_autoPumpLcd.GetArePauseSettingsOpened())
-    UpdateSelectedValuesForPauseTimeOfSelectedPump();
-  else
-    UpdateSelectedValuesForWorkTimeOfSelectedPump();
-}
-
+#pragma region Encoder Handlers
 void OnAutoPumpEncoderLeftTurn()
 {
-  Serial.println("OnAutoPumpEncoderLeftTurn");
- _autoPumpLcd.MoveToPreviousCursorPosition();
-  OnAutoPumpLcdCursorPositionChanged();
+  _autoPumpStateMachine.Run(EncoderLeftTurnCommand);
+  //  _autoPumpLcd.MoveToPreviousCursorPosition();
+  //   OnAutoPumpLcdCursorPositionChanged();
 }
 
 void OnAutoPumpEncoderRightTurn()
 {
-  Serial.println("OnAutoPumpEncoderRightTurn");
-  _autoPumpLcd.MoveToNextCursorPosition();
-  OnAutoPumpLcdCursorPositionChanged();
+  _autoPumpStateMachine.Run(EncoderRightTurnCommand);
+
+  // _autoPumpLcd.MoveToNextCursorPosition();
+  // OnAutoPumpLcdCursorPositionChanged();
 }
-void OnAutoPumpLcdSelectedValuesChangedWhenHold()
+void OnAutoPumpEncoderClick()
 {
-  if (_autoPumpLcd.GetCursorPosition() == SelectPump)
-  {
-    _autoPumpLcd.PrintSelectedPumpName();
+  _autoPumpStateMachine.Run(EncoderClickCommand);
 
-    //TODO: update remaining time
-  }
-  else if(_autoPumpLcd.GetAreSettingsMenuOpened())
-    UpdateSelectedPumpPauseAndWorkTime();
+  // auto cursorPosition = _autoPumpLcd.GetCursorPosition();
+
+  // switch (cursorPosition)
+  // {
+  // case SelectSettings:
+  //   _autoPumpLcd.GoToSettings();
+  //   break;
+  // case SelectBack:
+  //   _autoPumpLcd.LeaveSettings();
+  //   break;
+  // default:
+  //   break;
+  // }
 }
-
 void OnAutoPumpEncoderLeftHoldTurn()
 {
-  Serial.println("OnAutoPumpEncoderLeftHoldTurn");
-  _autoPumpLcd.UpdateSelectedValues(-1);
-    OnAutoPumpLcdSelectedValuesChangedWhenHold();
+  _autoPumpStateMachine.Run(EncoderHoldLeftTurnCommand);
 }
 
 void OnAutoPumpEncoderRightHoldTurn()
 {
-  Serial.println("OnAutoPumpEncoderRightHoldTurn");
-   _autoPumpLcd.UpdateSelectedValues(1);
-    OnAutoPumpLcdSelectedValuesChangedWhenHold();
+  _autoPumpStateMachine.Run(EncoderHoldRightTurnCommand);
 }
 
-void OnAutoPumpEncoderClick()
+#pragma endregion
+
+#pragma region AutoPumpStateMachine Handlers
+
+void OnStateMachineIncreaseValue()
 {
-  Serial.println("OnAutoPumpEncoderClick");
-
-  auto cursorPosition = _autoPumpLcd.GetCursorPosition();
-
-  switch (cursorPosition)
-  {
-  case SelectSettings:
-    _autoPumpLcd.GoToSettings();
-    break;
-  case SelectBack:
-    _autoPumpLcd.LeaveSettings();
-    break;
-  default:
-    break;
-  }
+  //  _autoPumpLcd.UpdateSelectedValues(1);
 }
+void OnStateMachineDecreaseValue()
+{
+  // _autoPumpLcd.UpdateSelectedValues(-1);
+}
+void OnStateMachineStateChanged()
+{
+
+}
+void OnStateMachineLeftSettings(){
+  
+}
+#pragma endregion
 
 void setup()
 {
@@ -230,10 +208,15 @@ void setup()
   pinMode(PIN_Button1, INPUT_PULLUP);
   pinMode(PIN_Button2, INPUT_PULLUP);
 
-  _pumpButton1.attachLongPressStart(OnLongPressButton1Start);
-  _pumpButton1.attachLongPressStop(OnLongPressButton1Stop);
-  _pumpButton2.attachLongPressStart(OnLongPressButton2Start);
-  _pumpButton2.attachLongPressStop(OnLongPressButton2Stop);
+  _autoPumpStateMachine.AttachOnIncreaseValue(&OnStateMachineIncreaseValue);
+  _autoPumpStateMachine.AttachOnDecreaseValue(&OnStateMachineDecreaseValue);
+  _autoPumpStateMachine.AttachOnStateChanged(&OnStateMachineStateChanged);
+  _autoPumpStateMachine.AttachOnLeftSettings(&OnStateMachineLeftSettings);
+
+  _pumpButton1.attachLongPressStart(&OnLongPressButton1Start);
+  _pumpButton1.attachLongPressStop(&OnLongPressButton1Stop);
+  _pumpButton2.attachLongPressStart(&OnLongPressButton2Start);
+  _pumpButton2.attachLongPressStop(&OnLongPressButton2Stop);
 
   _pumps[0] = &_pump1;
   _pumps[1] = &_pump2;
@@ -247,13 +230,12 @@ void setup()
 
   _autoPumpEncoder.SetEncoderType(ENCODER_TYPE);
   _autoPumpEncoder.SetEncoderDirection(IS_ENCODER_REVERSED);
-  // _autoPumpLcd.AttachOnCursorPositionChanged(OnAutoPumpLcdCursorPositionChanged);
 
-  _autoPumpEncoder.AttachOnLeftTurn(OnAutoPumpEncoderLeftTurn);
-  _autoPumpEncoder.AttachOnRightTurn(OnAutoPumpEncoderRightTurn);
-  _autoPumpEncoder.AttachOnLeftHoldTurn(OnAutoPumpEncoderLeftHoldTurn);
-  _autoPumpEncoder.AttachOnRightHoldTurn(OnAutoPumpEncoderRightHoldTurn);
-  _autoPumpEncoder.AttachOnClick(OnAutoPumpEncoderClick);
+  _autoPumpEncoder.AttachOnLeftTurn(&OnAutoPumpEncoderLeftTurn);
+  _autoPumpEncoder.AttachOnRightTurn(&OnAutoPumpEncoderRightTurn);
+  _autoPumpEncoder.AttachOnLeftHoldTurn(&OnAutoPumpEncoderLeftHoldTurn);
+  _autoPumpEncoder.AttachOnRightHoldTurn(&OnAutoPumpEncoderRightHoldTurn);
+  _autoPumpEncoder.AttachOnClick(&OnAutoPumpEncoderClick);
 
   _autoPumpLcd.Init();
   _autoPumpLcd.IsAutoOff = IS_LCD_AUTO_OFF;

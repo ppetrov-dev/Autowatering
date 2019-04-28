@@ -24,14 +24,13 @@ private:
     LCD_1602_RUS _lcd;
     byte _columnCount;
     byte _rowCount;
+    byte _pumpAmount = 1;
     bool _isOn;
-   
-    enum LcdCursorPosition _cursorPosition = SelectPump;
-    int _selectedPumpIndex = 0;
     WorkTime _workTime = WorkTime(0, 0, 30);
     PauseTime _pauseTime = PauseTime(1, 0, 0);
-    byte _pumpAmount = 1;
+    int _selectedPumpIndex = 0;
 
+    enum LcdCursorPosition _cursorPosition = SelectPump;
     callbackFunction _onCursorPositionChangedCallbackFunc;
 
     void ConstrainSelectedPumpIndex();
