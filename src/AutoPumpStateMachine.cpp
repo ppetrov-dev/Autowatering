@@ -1,9 +1,5 @@
 #include "AutoPumpStateMachine.h"
 
-AutoPumpState AutoPumpStateMachine::GetState(){
-    return _autoPumpState;
-}
-
 void AutoPumpStateMachine::Run(Command command)
 {
     switch (command)
@@ -12,6 +8,7 @@ void AutoPumpStateMachine::Run(Command command)
         HandleEncoderLeftTurnIfNeeded();
         break;
     case EncoderRightTurnCommand:
+        HandleEncoderRightTurnIfNeeded();
         break;
     case EncoderClickCommand:
         HandleEncoderClickIfNeeded();
@@ -26,18 +23,23 @@ void AutoPumpStateMachine::Run(Command command)
         break;
     }
 }
-
+AutoPumpState AutoPumpStateMachine::GetState()
+{
+    return _autoPumpState;
+}
 void AutoPumpStateMachine::HandleEncoderClickIfNeeded()
 {
     switch (_autoPumpState)
     {
     case SelectSettingsState:
+     if(_onBeforeEnterToSettingsCallback)
+            _onBeforeEnterToSettingsCallback();
         SetState(SelectBackState);
-        if(_onLeftSettingsCallback)
-            _onLeftSettingsCallback();
         break;
     case SelectBackState:
         SetState(SelectSettingsState);
+           if(_onLeftSettingsCallback)
+            _onLeftSettingsCallback();
         break;
     default:
         break;
@@ -86,6 +88,7 @@ void AutoPumpStateMachine::SetState(AutoPumpState newState)
     if(_autoPumpState == newState)
         return;
 
+    auto oldState = _autoPumpState;
     _autoPumpState = newState;
 
     if (_onStateChangedCallback)
@@ -107,20 +110,21 @@ AutoPumpState AutoPumpStateMachine::GetNextState()
         return SelectSettingsState;
     case SelectSettingsState:
         return SelectPumpState;
+
     case SelectBackState:
-        return SelectPauseDaysState;
-    case SelectPauseDaysState:
-        return SelectPauseHoursState;
-    case SelectPauseHoursState:
-        return SelectPauseMinutesState;
-    case SelectPauseMinutesState:
         return SelectWorkHoursState;
     case SelectWorkHoursState:
-        return SelectWorkMinutesState;
+        return SelectWorkMinutesState;   
     case SelectWorkMinutesState:
-        return SelectWorkSecondsState;
+        return SelectWorkSecondsState; 
     case SelectWorkSecondsState:
-        return SelectBackState;
+        return SelectPauseDaysState; 
+    case SelectPauseDaysState:
+        return SelectPauseHoursState;    
+    case SelectPauseHoursState:
+        return SelectPauseMinutesState; 
+    case SelectPauseMinutesState:
+        return SelectBackState;        
     }
 }
 AutoPumpState AutoPumpStateMachine::GetPreviousState()
@@ -131,20 +135,21 @@ AutoPumpState AutoPumpStateMachine::GetPreviousState()
         return SelectSettingsState;
     case SelectSettingsState:
         return SelectPumpState;
+
     case SelectBackState:
-        return SelectWorkSecondsState;
-    case SelectPauseDaysState:
-        return SelectBackState;
-    case SelectPauseHoursState:
-        return SelectPauseDaysState;
+        return SelectPauseMinutesState;
     case SelectPauseMinutesState:
         return SelectPauseHoursState;
-    case SelectWorkHoursState:
-        return SelectPauseMinutesState;
-    case SelectWorkMinutesState:
-        return SelectWorkHoursState;
+    case SelectPauseHoursState:
+        return SelectPauseDaysState;
+    case SelectPauseDaysState:
+        return SelectWorkSecondsState;
     case SelectWorkSecondsState:
         return SelectWorkMinutesState;
+    case SelectWorkMinutesState:
+        return SelectWorkHoursState;
+    case SelectWorkHoursState:
+        return SelectBackState;
     }
 }
 
@@ -163,4 +168,8 @@ void AutoPumpStateMachine::AttachOnIncreaseValue(autoPumpStateMachineCallback ca
 void AutoPumpStateMachine::AttachOnLeftSettings(autoPumpStateMachineCallback callback)
 {
     _onLeftSettingsCallback = callback;
+}
+void AutoPumpStateMachine::AttachOnBeforeEnterToSettings(autoPumpStateMachineCallback callback)
+{
+    _onBeforeEnterToSettingsCallback = callback;
 }

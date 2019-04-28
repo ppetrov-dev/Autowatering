@@ -14,6 +14,7 @@ private:
     autoPumpStateMachineCallback _onDecreaseValueCallback;
     autoPumpStateMachineCallback _onIncreaseValueCallback;
     autoPumpStateMachineCallback _onLeftSettingsCallback;
+    autoPumpStateMachineCallback _onBeforeEnterToSettingsCallback;
 
     enum AutoPumpState _autoPumpState = SelectPumpState; 
 
@@ -38,6 +39,7 @@ public:
     void AttachOnDecreaseValue(autoPumpStateMachineCallback callback);
     void AttachOnIncreaseValue(autoPumpStateMachineCallback callback);
     void AttachOnLeftSettings(autoPumpStateMachineCallback callback);
+    void AttachOnBeforeEnterToSettings(autoPumpStateMachineCallback callback);
 };
 
 

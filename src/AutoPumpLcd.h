@@ -12,14 +12,15 @@
 #include "WorkTime.h"
 #include "PauseTime.h"
 
-extern "C"
-{
-    typedef void (*callbackFunction)(void);
+extern "C" {
+    typedef void (*autoPumpLcdCallback)(void);
 }
 
 class AutoPumpLcd
 {
 private:
+    autoPumpLcdCallback _onSelectedPumpChangedCallback;
+
     unsigned long _lastActivityTimeInMilliseconds;
     LCD_1602_RUS _lcd;
     byte _columnCount;
@@ -30,44 +31,48 @@ private:
     PauseTime _pauseTime = PauseTime(1, 0, 0);
     int _selectedPumpIndex = 0;
 
-    enum LcdCursorPosition _cursorPosition = SelectPump;
-    callbackFunction _onCursorPositionChangedCallbackFunc;
+    enum AutoPumpState _state;
 
     void ConstrainSelectedPumpIndex();
-    void SetCursorPosition(LcdCursorPosition cursorPosition);
-    LcdCursorPosition GetNextCursorPosition();
-    LcdCursorPosition GetPreviousCursorPosition();
-
-    void ClearRow(byte rowIndex);
-    void UpdateArrowPosition();
-    void RedrawArrowSpots();
+    void SetSelectedPumpIndex(int newPumpIndex);
     bool GetIsLcdTimeoutExpired();
-    bool TryUpdateActivityTimeAndSwitchOnIfNeeded();
+    void UpdateActivityTimeAndSwitchOnIfNeeded();
     void SwitchOn();
     void SwitchOff();
+
+    void ClearRow(byte rowIndex);
+    void PrintArrowPosition();
+    void ReprintArrowSpots();
+    void PrintPauseRow();
+    void PrintWorkRow();
+    void PrintPumpName();
+    void PrintSettings();
+    void PrintBack();
+    void PrintState();
+
+    void PrintPauseDays();
+    void PrintPauseHours();
+    void PrintPauseMinutes();
+    void PrintWorkHours();
+    void PrintWorkMinutes();
+    void PrintWorkSeconds();
 public:
     bool IsAutoOff = true;
     byte TimeoutInSeconds = 30;
-    AutoPumpLcd(byte columnCount, byte rowCount, byte pumpAmount);
-    void Init();
-    void AttachOnCursorPositionChanged(callbackFunction newFunction);
-    bool GetArePauseSettingsOpened();
-    bool GetAreWorkSettingsOpened();
-    bool GetAreSettingsMenuOpened();
+    
+    AutoPumpLcd(byte columnCount, byte rowCount);
+    void Init(byte pumpAmount, AutoPumpState state);
     int GetSelectedPumpIndex();
-    void PrintSelectedPumpName();
-    void PrintDataAndUpdateArrowPosition();
-    void MoveToNextCursorPosition();
-    void MoveToPreviousCursorPosition();
+    void UpdateStateIfNeeded(AutoPumpState newState);
     void UpdateSelectedValues(int increment);
+    
     unsigned long ConvertWorkTimeToSeconds();
     unsigned long ConvertPauseTimeToSeconds();
     void UpdateWorkTimeFromSeconds(unsigned long seconds);
     void UpdatePauseTimeFromSeconds(unsigned long seconds);
-    LcdCursorPosition GetCursorPosition();
-    void Refresh();
-    void GoToSettings();
-    void LeaveSettings();
+
+    void AttachOnSelectedPumpChanged(autoPumpLcdCallback callback);
+    
     void Tick();
 };
 #endif
