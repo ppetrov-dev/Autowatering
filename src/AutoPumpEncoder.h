@@ -10,7 +10,6 @@ class AutoPumpEncoder
 {
 private:
     Encoder _encoder;
-    callbackFunction _onAnyTurnCallbackFunc = NULL;
     callbackFunction _onRightTurnCallbackFunc = NULL;
     callbackFunction _onLeftTurnCallbackFunc = NULL;
     callbackFunction _onRightHoldTurnCallbackFunc = NULL;
@@ -21,7 +20,6 @@ public:
     bool IsHold();
     void Tick(void);
     void AttachOnClick(callbackFunction newFunction);
-    void AttachOnAnyTurn(callbackFunction newFunction);
     void AttachOnRightTurn(callbackFunction newFunction);
     void AttachOnLeftTurn(callbackFunction newFunction);
     void AttachOnRightHoldTurn(callbackFunction newFunction);

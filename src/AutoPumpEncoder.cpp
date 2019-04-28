@@ -14,11 +14,6 @@ void AutoPumpEncoder::SetEncoderDirection(bool isReversedEncoderDirection = fals
     _encoder.setDirection(isReversedEncoderDirection);
 }
 
-void AutoPumpEncoder::AttachOnAnyTurn(callbackFunction newFunction)
-{
-    _onAnyTurnCallbackFunc = newFunction;
-}
-
 void AutoPumpEncoder::AttachOnLeftTurn(callbackFunction newFunction)
 {
     _onLeftTurnCallbackFunc = newFunction;
@@ -48,10 +43,7 @@ bool AutoPumpEncoder::IsHold()
 }
 void AutoPumpEncoder::Tick()
 {
-    _encoder.tick();
-
-    if (_encoder.isTurn() && _onAnyTurnCallbackFunc != NULL)
-        _onAnyTurnCallbackFunc();
+     _encoder.tick();
 
     if (_encoder.isRight() && _onRightTurnCallbackFunc != NULL)
         _onRightTurnCallbackFunc();

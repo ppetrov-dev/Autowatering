@@ -25,24 +25,27 @@ private:
     byte _columnCount;
     byte _rowCount;
     bool _isOn;
+   
     enum LcdCursorPosition _cursorPosition = SelectPump;
     int _selectedPumpIndex = 0;
-
     WorkTime _workTime = WorkTime(0, 0, 30);
     PauseTime _pauseTime = PauseTime(1, 0, 0);
-
     byte _pumpAmount = 1;
 
+    callbackFunction _onCursorPositionChangedCallbackFunc;
+
     void ConstrainSelectedPumpIndex();
-    void ClearRow(byte rowIndex);
-    void UpdateArrowPosition();
-    void RedrawArrowSpots();
     void SetCursorPosition(LcdCursorPosition cursorPosition);
     LcdCursorPosition GetNextCursorPosition();
     LcdCursorPosition GetPreviousCursorPosition();
+
+    void ClearRow(byte rowIndex);
+    void UpdateArrowPosition();
+    void RedrawArrowSpots();
     bool GetIsLcdTimeoutExpired();
     bool TryUpdateActivityTimeAndSwitchOnIfNeeded();
-    callbackFunction _onCursorPositionChangedCallbackFunc;
+    void SwitchOn();
+    void SwitchOff();
 public:
     bool IsAutoOff = true;
     byte TimeoutInSeconds = 30;
@@ -53,8 +56,6 @@ public:
     bool GetAreWorkSettingsOpened();
     bool GetAreSettingsMenuOpened();
     int GetSelectedPumpIndex();
-    void SwitchOn();
-    void SwitchOff();
     void PrintSelectedPumpName();
     void PrintDataAndUpdateArrowPosition();
     void MoveToNextCursorPosition();
@@ -66,7 +67,6 @@ public:
     void UpdatePauseTimeFromSeconds(unsigned long seconds);
     LcdCursorPosition GetCursorPosition();
     void Refresh();
-    void Clear();
     void GoToSettings();
     void LeaveSettings();
     void Tick();

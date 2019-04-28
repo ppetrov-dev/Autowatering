@@ -5,11 +5,7 @@ AutoPumpLcd::AutoPumpLcd(byte columnCount, byte rowCount, byte pumpAmount) : _lc
     _pumpAmount = pumpAmount;
     _columnCount = columnCount;
     _rowCount = rowCount;
-}
 
-void AutoPumpLcd::Clear()
-{
-    _lcd.clear();
 }
 
 void AutoPumpLcd::GoToSettings()
@@ -354,7 +350,7 @@ void AutoPumpLcd::UpdatePauseTimeFromSeconds(unsigned long seconds)
 
 void AutoPumpLcd::Refresh()
 {
-    Clear();
+    _lcd.clear();
     PrintSelectedPumpName();
     PrintDataAndUpdateArrowPosition();
     SwitchOn();
