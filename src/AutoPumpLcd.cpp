@@ -51,8 +51,6 @@ void AutoPumpLcd::UpdateActivityTimeAndSwitchOnIfNeeded()
 void AutoPumpLcd::ClearRow(byte rowIndex)
 {
     _lcd.setCursor(0, rowIndex);
-    // char emptyString[_columnCount - 1];
-    // _lcd.print(emptyString);
     _lcd.print("                ");
     _lcd.setCursor(0, rowIndex);
 }
@@ -224,7 +222,7 @@ void AutoPumpLcd::PrintPauseRow()
 }
 void AutoPumpLcd::PrintState()
 {
-     switch (_state)
+    switch (_state)
     {
     case SelectSettingsState:
     case SelectPumpState:
@@ -250,42 +248,47 @@ void AutoPumpLcd::PrintState()
     default:
         break;
     }
-    
+
     PrintArrowPosition();
 }
-String AutoPumpLcd::ConstrainInputText(String inputedText){
+String AutoPumpLcd::ConstrainInputText(String inputedText)
+{
     auto lenght = inputedText.length();
-    auto indexOfFirstSpace = inputedText.indexOf(" ");
 
-    if(lenght <_columnCount && indexOfFirstSpace != -1)
+    if (lenght < _columnCount)
     {
-        auto firstSubstring = inputedText.substring(0, indexOfFirstSpace);
-        auto secondSubstring = inputedText.substring(indexOfFirstSpace, lenght);
-        for (byte i = 0; i < _columnCount - lenght; i++)
-            firstSubstring.concat(" ");
-        inputedText = firstSubstring + secondSubstring;
+        auto indexOfFirstSpace = inputedText.indexOf(" ");
+        if (indexOfFirstSpace != -1)
+        {
+            auto firstSubstring = inputedText.substring(0, indexOfFirstSpace);
+            auto secondSubstring = inputedText.substring(indexOfFirstSpace, lenght);
+            
+            for (byte i = 0; i < _columnCount - lenght; i++)
+                firstSubstring.concat(" ");
+            inputedText = firstSubstring + secondSubstring;
+        }
+        else{
+             for (byte i = 0; i < _columnCount - lenght; i++)
+                inputedText.concat(" ");
+        }
     }
     return inputedText;
 }
 void AutoPumpLcd::PrintOnRow(byte rowIndex, String text)
 {
-    if( rowIndex >= _rowCount)
+    if (rowIndex >= _rowCount)
         return;
     text = ConstrainInputText(text);
     _lcd.setCursor(0, rowIndex);
     _lcd.print(text);
 }
 
-
 #pragma endregion
-
-#pragma region Attach Methods
 
 void AutoPumpLcd::AttachOnSelectedPumpChanged(autoPumpLcdCallback callback)
 {
     _onSelectedPumpChangedCallback = callback;
 }
-#pragma endregion
 
 void AutoPumpLcd::UpdateStateIfNeeded(AutoPumpState newState)
 {
@@ -318,37 +321,37 @@ void AutoPumpLcd::UpdateSelectedValues(int increment)
     if (_state == SelectPumpState)
         SetSelectedPumpIndex(_selectedPumpIndex + increment);
     else
+    {
+        switch (_state)
         {
-            switch (_state)
-            {
-            case SelectPauseDaysState:
-                _pauseTime.ChangeDays(increment);
-                PrintPauseDays();
-                break;
-            case SelectPauseHoursState:
-                _pauseTime.ChangeHours(increment);
-                PrintPauseHours();
-                break;
-            case SelectPauseMinutesState:
-                _pauseTime.ChangeMinutes(increment);
-                PrintPauseMinutes();
-                break;
-            case SelectWorkHoursState:
-                _workTime.ChangeHours(increment);
-                PrintWorkHours();
-                break;
-            case SelectWorkMinutesState:
-                _workTime.ChangeMinutes(increment);
-                PrintWorkMinutes();
-                break;
-            case SelectWorkSecondsState:
-                _workTime.ChangeSeconds(increment);
-                PrintWorkSeconds();
-                break;
-            default:
-                break;
-            }
+        case SelectPauseDaysState:
+            _pauseTime.ChangeDays(increment);
+            PrintPauseDays();
+            break;
+        case SelectPauseHoursState:
+            _pauseTime.ChangeHours(increment);
+            PrintPauseHours();
+            break;
+        case SelectPauseMinutesState:
+            _pauseTime.ChangeMinutes(increment);
+            PrintPauseMinutes();
+            break;
+        case SelectWorkHoursState:
+            _workTime.ChangeHours(increment);
+            PrintWorkHours();
+            break;
+        case SelectWorkMinutesState:
+            _workTime.ChangeMinutes(increment);
+            PrintWorkMinutes();
+            break;
+        case SelectWorkSecondsState:
+            _workTime.ChangeSeconds(increment);
+            PrintWorkSeconds();
+            break;
+        default:
+            break;
         }
+    }
 
     UpdateActivityTimeAndSwitchOnIfNeeded();
 }

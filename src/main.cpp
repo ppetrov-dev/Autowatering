@@ -42,14 +42,12 @@ void UpdateSelectedValuesToSelectedPump()
   pump->PauseTimeInMinutes = Converters::SecondsToMinutes(pauseTimeInSeconds);
   pump->WorkTimeInSeconds = workTimeInSeconds;
 }
-
 Pump *GetSelectedPump()
 {
   auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
   auto pump = _pumps[pumpIndex];
   return pump;
 }
-
 void UpdateSelectedValuesFromSelectedPump()
 {
   auto pump = GetSelectedPump();
@@ -61,57 +59,6 @@ void UpdateSelectedValuesFromSelectedPump()
   _autoPumpLcd.UpdateWorkTimeFromSeconds(workTimeInSeconds);
 }
 
-void SwitchPumpOn(byte pumpIndex)
-{
-  _isWatering = true;
-  auto pump = _pumps[pumpIndex];
-  pump->SwitchOn();
-  Serial.println("Pump #" + String(pumpIndex + 1) + " ON");
-}
-
-void SwitchPumpOff(byte pumpIndex)
-{
-  auto pump = _pumps[pumpIndex];
-  pump->SwitchOff();
-  Serial.println("Pump #" + String(pumpIndex + 1) + " OFF");
-  _isWatering = false;
-}
-
-void CheckPumpsToWaterAndSwitchOnIfNeeded()
-{
-  if (_isWatering)
-    return;
-
-  for (byte pumpIndex = 0; pumpIndex < PUPM_AMOUNT; pumpIndex++)
-  {
-    auto pump = _pumps[pumpIndex];
-    auto isTimeForWatering = pump->GetIsTimeForWatering();
-
-    if (isTimeForWatering)
-    {
-      SwitchPumpOn(pumpIndex);
-      break;
-    }
-  }
-}
-
-void CheckPumpsToWaterAndSwitchOffIfNeeded()
-{
-  if (!_isWatering)
-    return;
-
-  for (byte pumpIndex = 0; pumpIndex < PUPM_AMOUNT; pumpIndex++)
-  {
-    auto pump = _pumps[pumpIndex];
-    auto isTimeToStopWatering = pump->GetIsTimeToStopWatering();
-
-    if (!isTimeToStopWatering)
-      continue;
-
-    SwitchPumpOff(pumpIndex);
-  }
-}
-
 void UpdateSelectedPumpPauseAndWorkTime()
 {
   auto pump = GetSelectedPump();
@@ -120,28 +67,6 @@ void UpdateSelectedPumpPauseAndWorkTime()
 
   pump->WorkTimeInSeconds = workTimeInSeconds;
   pump->PauseTimeInMinutes = Converters::SecondsToMinutes(pauseTimeInSeconds);
-}
-
-void TryForceStartWatering(byte pumpIndex)
-{
-  if (_isWatering)
-  {
-    Serial.println("Force Watering could not be started for Pump #" + String(pumpIndex + 1));
-    Serial.println("Only one pump could be enabled at the same time");
-    return;
-  }
-  SwitchPumpOn(pumpIndex);
-}
-
-void TryForceStopWatering(byte pumpIndex)
-{
-  if (!_isWatering)
-  {
-    Serial.println("Force Watering could not be stopped for Pump #" + String(pumpIndex + 1));
-    Serial.println("There are no enabled pumps");
-    return;
-  }
-  SwitchPumpOff(pumpIndex);
 }
 
 void TryPrintSelectedPumpStatus()
@@ -157,12 +82,6 @@ void TryPrintSelectedPumpStatus()
     break;
   }
 }
-#pragma region AutoPumpLcd Handlers
-void OnSelectedPumpChanged()
-{
-  TryPrintSelectedPumpStatus();
-}
-#pragma endregion
 
 #pragma region AutoPumpStateMachine Handlers
 void OnStateChanged()
@@ -179,10 +98,8 @@ void OnStateMachineLeftSettings()
 
 void setup()
 {
-  Serial.begin(9600);
-
-  pinMode(PIN_Button1, INPUT_PULLUP);
-  pinMode(PIN_Button2, INPUT_PULLUP);
+  if(DEBUG)
+    Serial.begin(9600);
 
   _autoPumpStateMachine.AttachOnIncreaseValue([]() { _autoPumpLcd.UpdateSelectedValues(1); });
   _autoPumpStateMachine.AttachOnDecreaseValue([]() { _autoPumpLcd.UpdateSelectedValues(-1); });
@@ -190,10 +107,10 @@ void setup()
   _autoPumpStateMachine.AttachOnLeftSettings(&OnStateMachineLeftSettings);
   _autoPumpStateMachine.AttachOnBeforeEnterToSettings([]() { UpdateSelectedValuesFromSelectedPump(); });
 
-  _pumpButton1.attachLongPressStart([]() { TryForceStartWatering(0); });
-  _pumpButton1.attachLongPressStop([]() { TryForceStopWatering(0); });
-  _pumpButton2.attachLongPressStart([]() { TryForceStartWatering(1); });
-  _pumpButton2.attachLongPressStop([]() { TryForceStopWatering(1); });
+  _pumpButton1.attachLongPressStart([]() { _pumps[0]->ForceSwitchOn(); });
+  _pumpButton1.attachLongPressStop([]() { _pumps[0]->ForceSwitchOff(); });
+  _pumpButton2.attachLongPressStart([]() { _pumps[1]->ForceSwitchOn(); });
+  _pumpButton2.attachLongPressStop([]() { _pumps[1]->ForceSwitchOff(); });
 
   _pumps[0] = &_pump1;
   _pumps[1] = &_pump2;
@@ -216,41 +133,11 @@ void setup()
   _autoPumpLcd.IsAutoOff = IS_LCD_AUTO_OFF;
   _autoPumpLcd.TimeoutInSeconds = Lcd_TIMEOUT_SECONDS;
   _autoPumpLcd.Init(PUPM_AMOUNT, _autoPumpStateMachine.GetState());
-  _autoPumpLcd.AttachOnSelectedPumpChanged(&OnSelectedPumpChanged);
+  _autoPumpLcd.AttachOnSelectedPumpChanged([]() { TryPrintSelectedPumpStatus(); });
 
   _timer.SetTimeout(1000);
   _timer.AttachOnTick([]() { TryPrintSelectedPumpStatus(); });
   _timer.Start();
-
-  // _autoPumpEncoder.Tick();
-  //   if (_autoPumpEncoder.IsHold())
-  //   {
-  //     _lcd.setCursor(0, 0);
-  //     _lcd.print("Reset settings...");
-  //     //  EEPROM.clear();
-  //   }
-  //   while (!_autoPumpEncoder.IsHold())
-  //     ;
-  //   _lcd.clear(); // очищаем дисплей, продолжаем работу
-
-  // // в ячейке 1023 должен быть записан флажок, если его нет - делаем (ПЕРВЫЙ ЗАПУСК)
-  // if (EEPROM.read(1023) != 5)
-  // {
-  //   EEPROM.writeByte(1023, 5);
-
-  //   // для порядку сделаем 1 ячейки с 0 по 500
-  //   for (byte i = 0; i < 500; i += 4)
-  //   {
-  //     EEPROM.writeLong(i, 0);
-  //   }
-  // }
-
-  // for (byte i = 0; i < PUPM_AMOUNT; i++)
-  // {
-  //   _pumpPauseTimesInMinutes[i] = EEPROM.readLong(8 * i);    // читаем данные из памяти. На чётных - период (ч)
-  //   _pumpWorkTimesInMinutes[i] = EEPROM.readLong(8 * i + 4); // на нечётных - полив (с)
-  //   _pumpStates[i] = DEFAULT_PUMP_STATE;
-  // }
 }
 
 void loop()
@@ -261,6 +148,16 @@ void loop()
   _autoPumpLcd.Tick();
   _timer.Tick();
 
-  CheckPumpsToWaterAndSwitchOnIfNeeded();
-  CheckPumpsToWaterAndSwitchOffIfNeeded();
+  for (byte i = 0; i < PUPM_AMOUNT; i++)
+  {
+    auto pump = _pumps[i];
+    if (_isWatering && IS_PARALLEL_WATERING_DISABLED && !pump->GetIsWorking())
+        continue;
+
+    pump->Tick();
+
+    _isWatering = pump->GetIsWorking();
+    if (_isWatering && IS_PARALLEL_WATERING_DISABLED)
+      break;
+  }
 }

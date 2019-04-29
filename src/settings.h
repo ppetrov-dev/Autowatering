@@ -1,11 +1,14 @@
 #ifndef settingsH
 #define settingsH
 
+#define DEBUG 1
+
 #define IS_LCD_AUTO_OFF 1
-#define Lcd_TIMEOUT_SECONDS 60
-#define ENCODER_TYPE 1 // тип энкодера (0 или 1). Если энкодер работает некорректно (пропуск шагов), смените тип
 #define IS_ENCODER_REVERSED 1
-#define DEFAULT_PUMP_STATE 0 // реле: 1 - высокого уровня (или мосфет), 0 - низкого
+#define IS_PARALLEL_WATERING_DISABLED 1
+
+#define Lcd_TIMEOUT_SECONDS 60
+#define ENCODER_TYPE 1 // 0 or 1, change the type If incorrect working
 
 #define PIN_EncoderClk 9
 #define PIN_EncoderDt 10
