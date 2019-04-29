@@ -57,9 +57,9 @@ void AutoPumpStateMachine::HandleEncoderRightTurnIfNeeded()
 bool AutoPumpStateMachine::IsChangableValueState(){
  switch (_autoPumpState)
     {
-    case SelectPauseDaysState:
-    case SelectPauseHoursState:
-    case SelectPauseMinutesState:
+    case SelectWaitDaysState:
+    case SelectWaitHoursState:
+    case SelectWaitMinutesState:
     case SelectWorkHoursState:
     case SelectWorkMinutesState:
     case SelectWorkSecondsState:
@@ -118,12 +118,12 @@ AutoPumpState AutoPumpStateMachine::GetNextState()
     case SelectWorkMinutesState:
         return SelectWorkSecondsState; 
     case SelectWorkSecondsState:
-        return SelectPauseDaysState; 
-    case SelectPauseDaysState:
-        return SelectPauseHoursState;    
-    case SelectPauseHoursState:
-        return SelectPauseMinutesState; 
-    case SelectPauseMinutesState:
+        return SelectWaitDaysState; 
+    case SelectWaitDaysState:
+        return SelectWaitHoursState;    
+    case SelectWaitHoursState:
+        return SelectWaitMinutesState; 
+    case SelectWaitMinutesState:
         return SelectBackState;        
     }
 }
@@ -137,12 +137,12 @@ AutoPumpState AutoPumpStateMachine::GetPreviousState()
         return SelectPumpState;
 
     case SelectBackState:
-        return SelectPauseMinutesState;
-    case SelectPauseMinutesState:
-        return SelectPauseHoursState;
-    case SelectPauseHoursState:
-        return SelectPauseDaysState;
-    case SelectPauseDaysState:
+        return SelectWaitMinutesState;
+    case SelectWaitMinutesState:
+        return SelectWaitHoursState;
+    case SelectWaitHoursState:
+        return SelectWaitDaysState;
+    case SelectWaitDaysState:
         return SelectWorkSecondsState;
     case SelectWorkSecondsState:
         return SelectWorkMinutesState;

@@ -1,11 +1,11 @@
-#include "PauseTime.h"
+#include "WaitTime.h"
 
-PauseTime::PauseTime(long days, long hours, long minutes)
+WaitTime::WaitTime(long days, long hours, long minutes)
     : TimeBase(hours, minutes)
 {
     _days = days;
 }
-void PauseTime::ConstrainDays()
+void WaitTime::ConstrainDays()
 {
     if (_days > 9)
         _days = 0;
@@ -13,12 +13,12 @@ void PauseTime::ConstrainDays()
         _days = 9;
 }
 
-unsigned long PauseTime::ToSeconds()
+unsigned long WaitTime::ToSeconds()
 {
     return TimeBase::ToSeconds() + Converters::DaysToSeconds(_days);
 }
 
-void PauseTime::UpdateValuesFromSeconds(unsigned long seconds)
+void WaitTime::UpdateValuesFromSeconds(unsigned long seconds)
 {
 
     auto days = Converters::SecondsToDays(seconds);
@@ -28,13 +28,13 @@ void PauseTime::UpdateValuesFromSeconds(unsigned long seconds)
     TimeBase::UpdateValuesFromSeconds(secondsWithoutDays);
 }
 
-void PauseTime::ChangeDays(int increment)
+void WaitTime::ChangeDays(int increment)
 {
     _days += increment;
     ConstrainDays();
 }
 
-unsigned long PauseTime::GetDays()
+unsigned long WaitTime::GetDays()
 {
     return _days;
 }

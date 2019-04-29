@@ -6,7 +6,7 @@ Pump::Pump(byte pin)
 }
 bool Pump::IsAutoWateringEnabled()
 {
-    return WorkTimeInSeconds != 0 && PauseTimeInMinutes != 0;
+    return WorkTimeInSeconds != 0 && WaitTimeInMinutes != 0;
 }
 void Pump::Init()
 {
@@ -50,10 +50,10 @@ bool Pump::IsTimeForWatering()
         return false;
 
     auto currentMilliseconds = millis();
-    auto pauseTimeInMilliseconds = Converters::MinutesToMilliseconds(PauseTimeInMinutes);
+    auto waitTimeInMilliseconds = Converters::MinutesToMilliseconds(WaitTimeInMinutes);
     auto passedTimeinMilliseconds = currentMilliseconds - _stopTimeInMilliseconds;
 
-    return passedTimeinMilliseconds >= pauseTimeInMilliseconds;
+    return passedTimeinMilliseconds >= waitTimeInMilliseconds;
 }
 
 bool Pump::IsTimeToStopWatering()
@@ -110,7 +110,7 @@ String Pump::GetFormatedStringTime()
     if (_isForcedlyStated)
         return ConvertMillisecondsToSecondsString(currentMilliseconds - timeInMilliseconds);
 
-    auto periodTimeInMilliseconds = _isWorking ? Converters::SecondsToMilliseconds(WorkTimeInSeconds) : Converters::MinutesToMilliseconds(PauseTimeInMinutes);
+    auto periodTimeInMilliseconds = _isWorking ? Converters::SecondsToMilliseconds(WorkTimeInSeconds) : Converters::MinutesToMilliseconds(WaitTimeInMinutes);
     auto finalTimeInMilliseconds = periodTimeInMilliseconds + timeInMilliseconds;
     auto remainingTimeInMilliseconds = currentMilliseconds < finalTimeInMilliseconds? finalTimeInMilliseconds - currentMilliseconds: 0;
     return ConvertMillisecondsToStringTimeFormat(remainingTimeInMilliseconds);

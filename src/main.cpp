@@ -1,15 +1,13 @@
-#include <EEPROMex.h>
-#include <EEPROMVar.h>
 #include "OneButton.h"
-
-#include "AutoPumpEncoder.h"
-#include "AutoPumpLcd.h"
-#include "AutoPumpStateMachine.h"
-#include "Pump.h"
+#include <EEPROM.h>
+#include "AutoPumpEncoder/AutoPumpEncoder.h"
+#include "AutoPumpLcd/AutoPumpLcd.h"
+#include "AutoPumpStateMachine/AutoPumpStateMachine.h"
+#include "Pump/Pump.h"
 #include "settings.h"
 #include "enums.h"
 #include "converters.h"
-#include "Timer.h"
+#include "Timer/Timer.h"
 
 AutoPumpStateMachine _autoPumpStateMachine;
 AutoPumpEncoder _autoPumpEncoder = AutoPumpEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
@@ -27,46 +25,45 @@ bool _isWatering;
 
 void UpdateDataInMemoryForSelectedPump()
 {
-  // EEPROM.updateLong(8 * _selectedPumpNumber, _pumpPauseTimesInMinutes[_selectedPumpNumber]);
+  // EEPROM.updateLong(8 * _selectedPumpNumber, _pumpWaitTimesInMinutes[_selectedPumpNumber]);
   // EEPROM.updateLong(8 * _selectedPumpNumber + 4, _pumpWorkTimesInMinutes[_selectedPumpNumber]);
 }
 
-void UpdateSelectedValuesToSelectedPump()
+void UpdateSelectedValuesToSelectedPump(unsigned long waitTimeInSeconds, unsigned long workTimeInSeconds)
 {
   auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
   auto pump = _pumps[pumpIndex];
 
-  auto pauseTimeInSeconds = _autoPumpLcd.ConvertPauseTimeToSeconds();
-  auto workTimeInSeconds = _autoPumpLcd.ConvertWorkTimeToSeconds();
-
-  pump->PauseTimeInMinutes = Converters::SecondsToMinutes(pauseTimeInSeconds);
+  pump->WaitTimeInMinutes = Converters::SecondsToMinutes(waitTimeInSeconds);
   pump->WorkTimeInSeconds = workTimeInSeconds;
 }
+
 Pump *GetSelectedPump()
 {
   auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
   auto pump = _pumps[pumpIndex];
   return pump;
 }
+
 void UpdateSelectedValuesFromSelectedPump()
 {
   auto pump = GetSelectedPump();
-  auto pauseTimeInMinutes = pump->PauseTimeInMinutes;
-  auto pauseTimeInSeconds = Converters::MinutesToSeconds(pauseTimeInMinutes);
+  auto waitTimeInMinutes = pump->WaitTimeInMinutes;
+  auto waitTimeInSeconds = Converters::MinutesToSeconds(waitTimeInMinutes);
   auto workTimeInSeconds = pump->WorkTimeInSeconds;
 
-  _autoPumpLcd.UpdatePauseTimeFromSeconds(pauseTimeInSeconds);
+  _autoPumpLcd.UpdateWaitTimeFromSeconds(waitTimeInSeconds);
   _autoPumpLcd.UpdateWorkTimeFromSeconds(workTimeInSeconds);
 }
 
-void UpdateSelectedPumpPauseAndWorkTime()
+void UpdateSelectedPumpWaitAndWorkTime()
 {
   auto pump = GetSelectedPump();
   auto workTimeInSeconds = _autoPumpLcd.ConvertWorkTimeToSeconds();
-  auto pauseTimeInSeconds = _autoPumpLcd.ConvertPauseTimeToSeconds();
+  auto waitTimeInSeconds = _autoPumpLcd.ConvertWaitTimeToSeconds();
 
   pump->WorkTimeInSeconds = workTimeInSeconds;
-  pump->PauseTimeInMinutes = Converters::SecondsToMinutes(pauseTimeInSeconds);
+  pump->WaitTimeInMinutes = Converters::SecondsToMinutes(waitTimeInSeconds);
 }
 
 void TryPrintSelectedPumpStatus()
@@ -91,8 +88,9 @@ void OnStateChanged()
 }
 void OnStateMachineLeftSettings()
 {
-  //save data if needed
-  UpdateSelectedValuesToSelectedPump();
+  auto waitTimeInSeconds = _autoPumpLcd.ConvertWaitTimeToSeconds();
+  auto workTimeInSeconds = _autoPumpLcd.ConvertWorkTimeToSeconds();
+  UpdateSelectedValuesToSelectedPump(waitTimeInSeconds, workTimeInSeconds);
 }
 #pragma endregion
 

@@ -1,16 +1,16 @@
-#ifndef pauseTimeH
-#define pauseTimeH
+#ifndef waitTimeH
+#define waitTimeH
 
 #include "TimeBase.h"
 
-class PauseTime: public TimeBase
+class WaitTime: public TimeBase
 {
 private:
    long _days;
 
    void ConstrainDays();
 public:
-    PauseTime(long days, long hours, long minutes);
+    WaitTime(long days, long hours, long minutes);
     unsigned long ToSeconds();
     void UpdateValuesFromSeconds(unsigned long seconds);
     void ChangeDays(int increment);

@@ -24,7 +24,7 @@ private:
 
 public:
     unsigned long WorkTimeInSeconds = 45;
-    unsigned long PauseTimeInMinutes = 1;
+    unsigned long WaitTimeInMinutes = 1;
 
     Pump(byte pin);
     void Init();

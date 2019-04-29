@@ -81,9 +81,9 @@ void AutoPumpLcd::ReprintArrowSpots()
         _lcd.setCursor(13, 1);
         _lcd.print(":");
         break;
-    case SelectPauseDaysState:
-    case SelectPauseHoursState:
-    case SelectPauseMinutesState:
+    case SelectWaitDaysState:
+    case SelectWaitHoursState:
+    case SelectWaitMinutesState:
         _lcd.setCursor(7, 0);
         _lcd.print(" ");
         _lcd.setCursor(11, 0);
@@ -115,15 +115,15 @@ void AutoPumpLcd::PrintArrowPosition()
     case SelectBackState:
         _lcd.setCursor(11, 0);
         break;
-    case SelectPauseDaysState:
+    case SelectWaitDaysState:
     case SelectWorkHoursState:
         _lcd.setCursor(7, 1);
         break;
-    case SelectPauseHoursState:
+    case SelectWaitHoursState:
     case SelectWorkMinutesState:
         _lcd.setCursor(10, 1);
         break;
-    case SelectPauseMinutesState:
+    case SelectWaitMinutesState:
     case SelectWorkSecondsState:
         _lcd.setCursor(13, 1);
         break;
@@ -177,25 +177,25 @@ void AutoPumpLcd::PrintWorkSeconds()
     _lcd.print(seconds);
 }
 
-void AutoPumpLcd::PrintPauseDays()
+void AutoPumpLcd::PrintWaitDays()
 {
-    auto days = _pauseTime.GetDays();
+    auto days = _waitTime.GetDays();
     _lcd.setCursor(8, 1);
     _lcd.print(days);
     _lcd.print("d");
     _lcd.print(" ");
 }
-void AutoPumpLcd::PrintPauseHours()
+void AutoPumpLcd::PrintWaitHours()
 {
-    auto hours = _pauseTime.GetHours();
+    auto hours = _waitTime.GetHours();
     _lcd.setCursor(11, 1);
     if (hours < 10)
         _lcd.print(0);
     _lcd.print(hours);
 }
-void AutoPumpLcd::PrintPauseMinutes()
+void AutoPumpLcd::PrintWaitMinutes()
 {
-    auto minutes = _pauseTime.GetMinutes();
+    auto minutes = _waitTime.GetMinutes();
     _lcd.setCursor(14, 1);
     if (minutes < 10)
         _lcd.print(0);
@@ -211,14 +211,14 @@ void AutoPumpLcd::PrintWorkRow()
     PrintWorkSeconds();
 }
 
-void AutoPumpLcd::PrintPauseRow()
+void AutoPumpLcd::PrintWaitRow()
 {
     _lcd.setCursor(0, 1);
     _lcd.print("waits");
 
-    PrintPauseDays();
-    PrintPauseHours();
-    PrintPauseMinutes();
+    PrintWaitDays();
+    PrintWaitHours();
+    PrintWaitMinutes();
 }
 void AutoPumpLcd::PrintState()
 {
@@ -229,12 +229,12 @@ void AutoPumpLcd::PrintState()
         PrintPumpName();
         PrintSettings();
         break;
-    case SelectPauseDaysState:
-    case SelectPauseHoursState:
-    case SelectPauseMinutesState:
+    case SelectWaitDaysState:
+    case SelectWaitHoursState:
+    case SelectWaitMinutesState:
         PrintPumpName();
         PrintBack();
-        PrintPauseRow();
+        PrintWaitRow();
         break;
     case SelectBackState:
         ClearRow(1);
@@ -324,17 +324,17 @@ void AutoPumpLcd::UpdateSelectedValues(int increment)
     {
         switch (_state)
         {
-        case SelectPauseDaysState:
-            _pauseTime.ChangeDays(increment);
-            PrintPauseDays();
+        case SelectWaitDaysState:
+            _waitTime.ChangeDays(increment);
+            PrintWaitDays();
             break;
-        case SelectPauseHoursState:
-            _pauseTime.ChangeHours(increment);
-            PrintPauseHours();
+        case SelectWaitHoursState:
+            _waitTime.ChangeHours(increment);
+            PrintWaitHours();
             break;
-        case SelectPauseMinutesState:
-            _pauseTime.ChangeMinutes(increment);
-            PrintPauseMinutes();
+        case SelectWaitMinutesState:
+            _waitTime.ChangeMinutes(increment);
+            PrintWaitMinutes();
             break;
         case SelectWorkHoursState:
             _workTime.ChangeHours(increment);
@@ -360,9 +360,9 @@ unsigned long AutoPumpLcd::ConvertWorkTimeToSeconds()
 {
     return _workTime.ToSeconds();
 }
-unsigned long AutoPumpLcd::ConvertPauseTimeToSeconds()
+unsigned long AutoPumpLcd::ConvertWaitTimeToSeconds()
 {
-    return _pauseTime.ToSeconds();
+    return _waitTime.ToSeconds();
 }
 
 void AutoPumpLcd::UpdateWorkTimeFromSeconds(unsigned long seconds)
@@ -370,9 +370,9 @@ void AutoPumpLcd::UpdateWorkTimeFromSeconds(unsigned long seconds)
     _workTime.UpdateValuesFromSeconds(seconds);
 }
 
-void AutoPumpLcd::UpdatePauseTimeFromSeconds(unsigned long seconds)
+void AutoPumpLcd::UpdateWaitTimeFromSeconds(unsigned long seconds)
 {
-    _pauseTime.UpdateValuesFromSeconds(seconds);
+    _waitTime.UpdateValuesFromSeconds(seconds);
 }
 
 bool AutoPumpLcd::GetIsLcdTimeoutExpired()

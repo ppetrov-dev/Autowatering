@@ -3,9 +3,9 @@
 
 enum AutoPumpState
 {
-  SelectPauseDaysState,
-  SelectPauseHoursState,
-  SelectPauseMinutesState,
+  SelectWaitDaysState,
+  SelectWaitHoursState,
+  SelectWaitMinutesState,
   SelectWorkHoursState,
   SelectWorkMinutesState,
   SelectWorkSecondsState,

@@ -5,8 +5,8 @@
 #include <LiquidCrystal_I2C.h>
 #include "enums.h"
 #include "converters.h"
-#include "WorkTime.h"
-#include "PauseTime.h"
+#include "Time/WorkTime.h"
+#include "Time/WaitTime.h"
 
 extern "C" {
     typedef void (*autoPumpLcdCallback)(void);
@@ -24,7 +24,7 @@ private:
     byte _pumpAmount = 1;
     bool _isOn;
     WorkTime _workTime = WorkTime(0, 0, 30);
-    PauseTime _pauseTime = PauseTime(1, 0, 0);
+    WaitTime _waitTime = WaitTime(1, 0, 0);
     int _selectedPumpIndex = 0;
 
     enum AutoPumpState _state;
@@ -38,16 +38,16 @@ private:
 
     void PrintArrowPosition();
     void ReprintArrowSpots();
-    void PrintPauseRow();
+    void PrintWaitRow();
     void PrintWorkRow();
     void PrintPumpName();
     void PrintSettings();
     void PrintBack();
     void PrintState();
 
-    void PrintPauseDays();
-    void PrintPauseHours();
-    void PrintPauseMinutes();
+    void PrintWaitDays();
+    void PrintWaitHours();
+    void PrintWaitMinutes();
     void PrintWorkHours();
     void PrintWorkMinutes();
     void PrintWorkSeconds();
@@ -65,9 +65,9 @@ public:
     void ClearRow(byte rowIndex);
     
     unsigned long ConvertWorkTimeToSeconds();
-    unsigned long ConvertPauseTimeToSeconds();
+    unsigned long ConvertWaitTimeToSeconds();
     void UpdateWorkTimeFromSeconds(unsigned long seconds);
-    void UpdatePauseTimeFromSeconds(unsigned long seconds);
+    void UpdateWaitTimeFromSeconds(unsigned long seconds);
 
     void AttachOnSelectedPumpChanged(autoPumpLcdCallback callback);
     
