@@ -10,10 +10,13 @@ class Pump
 private:
     byte _pin;
     bool _isWorking;
-    unsigned long _timerInMilliseconds;
-    StartTimerOption _startTimerOption = WhenPumpIsOff;
+    bool _isForcedlyStated;
+    unsigned long _startTimeInMilliseconds = 0;
+    unsigned long _stopTimeInMilliseconds = 0;
     bool IsEnabled();
-   
+    String ConvertMillisecondsToSecondsString(unsigned long milliseconds);
+    String ConvertMillisecondsToStringTimeFormat(unsigned long milliseconds);
+    String GetFormatedStringTime(bool showRemaining = true);
 public:
     unsigned long WorkTimeInSeconds = 30;
     unsigned long PauseTimeInMinutes = 10;
@@ -24,12 +27,11 @@ public:
     bool GetIsWorking();
     void SwitchOn();
     void SwitchOff();
-    void SetStartTimerOption(StartTimerOption startTimerOption);
 
     bool GetIsTimeForWatering();
     bool GetIsTimeToStopWatering();
 
-    String GetStatus();
+    String GetStatus(bool showRemaining = true);
 };
 
 #endif

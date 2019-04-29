@@ -24,7 +24,7 @@ unsigned long TimeBase::ToSeconds(){
 }
 
 void TimeBase::UpdateValuesFromSeconds(unsigned long seconds){
-    auto hours = Converters::SecondsToHour(seconds);
+    auto hours = Converters::SecondsToHours(seconds);
     auto secondsWithoutDaysAndHours= seconds - Converters::HoursToSeconds(hours);
     auto minutes = Converters::SecondsToMinutes(secondsWithoutDaysAndHours);
 

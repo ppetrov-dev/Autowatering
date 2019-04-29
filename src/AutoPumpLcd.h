@@ -28,7 +28,7 @@ private:
     int _selectedPumpIndex = 0;
 
     enum AutoPumpState _state;
-
+    String ConstrainInputText(String inputedText);
     void ConstrainSelectedPumpIndex();
     void SetSelectedPumpIndex(int newPumpIndex);
     bool GetIsLcdTimeoutExpired();
@@ -61,7 +61,7 @@ public:
     void UpdateStateIfNeeded(AutoPumpState newState);
     void UpdateSelectedValues(int increment);
     
-    void PrintToRow(byte rowIndex, String text);
+    void PrintOnRow(byte rowIndex, String text);
     void ClearRow(byte rowIndex);
     
     unsigned long ConvertWorkTimeToSeconds();

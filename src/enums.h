@@ -1,10 +1,5 @@
 #ifndef enumsH
 #define enumsH
-enum StartTimerOption
-{
-  WhenPumpIsOn,
-  WhenPumpIsOff
-};
 
 enum AutoPumpState
 {

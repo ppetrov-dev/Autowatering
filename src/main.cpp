@@ -153,9 +153,7 @@ void TryPrintSelectedPumpStatus()
   case SelectSettingsState:
     auto pump = GetSelectedPump();
     auto status = pump->GetStatus();
-    _autoPumpLcd.PrintToRow(1, status);
-    break;
-  default:
+    _autoPumpLcd.PrintOnRow(1, status);
     break;
   }
 }
@@ -177,10 +175,6 @@ void OnStateMachineLeftSettings()
   //save data if needed
   UpdateSelectedValuesToSelectedPump();
 }
-void OnBeforeEnterToSettings()
-{
-  UpdateSelectedValuesFromSelectedPump();
-}
 #pragma endregion
 
 void setup()
@@ -194,7 +188,7 @@ void setup()
   _autoPumpStateMachine.AttachOnDecreaseValue([]() { _autoPumpLcd.UpdateSelectedValues(-1); });
   _autoPumpStateMachine.AttachOnStateChanged(&OnStateChanged);
   _autoPumpStateMachine.AttachOnLeftSettings(&OnStateMachineLeftSettings);
-  _autoPumpStateMachine.AttachOnBeforeEnterToSettings(&OnBeforeEnterToSettings);
+  _autoPumpStateMachine.AttachOnBeforeEnterToSettings([]() { UpdateSelectedValuesFromSelectedPump(); });
 
   _pumpButton1.attachLongPressStart([]() { TryForceStartWatering(0); });
   _pumpButton1.attachLongPressStop([]() { TryForceStopWatering(0); });
@@ -208,7 +202,6 @@ void setup()
   {
     auto pump = _pumps[i];
     pump->Init();
-    pump->SetStartTimerOption(START_TIMER_OPTION);
   }
 
   _autoPumpEncoder.SetEncoderType(ENCODER_TYPE);

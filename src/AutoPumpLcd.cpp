@@ -207,7 +207,7 @@ void AutoPumpLcd::PrintPauseMinutes()
 void AutoPumpLcd::PrintWorkRow()
 {
     _lcd.setCursor(0, 1);
-    _lcd.print("work ");
+    _lcd.print("works");
     PrintWorkHours();
     PrintWorkMinutes();
     PrintWorkSeconds();
@@ -216,7 +216,7 @@ void AutoPumpLcd::PrintWorkRow()
 void AutoPumpLcd::PrintPauseRow()
 {
     _lcd.setCursor(0, 1);
-    _lcd.print("pause");
+    _lcd.print("waits");
 
     PrintPauseDays();
     PrintPauseHours();
@@ -253,12 +253,25 @@ void AutoPumpLcd::PrintState()
     
     PrintArrowPosition();
 }
-void AutoPumpLcd::PrintToRow(byte rowIndex, String text)
+String AutoPumpLcd::ConstrainInputText(String inputedText){
+    auto lenght = inputedText.length();
+    auto indexOfFirstSpace = inputedText.indexOf(" ");
+
+    if(lenght <_columnCount && indexOfFirstSpace != -1)
+    {
+        auto firstSubstring = inputedText.substring(0, indexOfFirstSpace);
+        auto secondSubstring = inputedText.substring(indexOfFirstSpace, lenght);
+        for (byte i = 0; i < _columnCount - lenght; i++)
+            firstSubstring.concat(" ");
+        inputedText = firstSubstring + secondSubstring;
+    }
+    return inputedText;
+}
+void AutoPumpLcd::PrintOnRow(byte rowIndex, String text)
 {
     if( rowIndex >= _rowCount)
         return;
-    
-     ClearRow(rowIndex);
+    text = ConstrainInputText(text);
     _lcd.setCursor(0, rowIndex);
     _lcd.print(text);
 }
