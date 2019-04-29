@@ -227,7 +227,6 @@ void AutoPumpLcd::PrintState()
      switch (_state)
     {
     case SelectSettingsState:
-        ClearRow(1);//remove!
     case SelectPumpState:
         PrintPumpName();
         PrintSettings();
@@ -240,6 +239,7 @@ void AutoPumpLcd::PrintState()
         PrintPauseRow();
         break;
     case SelectBackState:
+        ClearRow(1);
     case SelectWorkHoursState:
     case SelectWorkMinutesState:
     case SelectWorkSecondsState:
@@ -253,6 +253,16 @@ void AutoPumpLcd::PrintState()
     
     PrintArrowPosition();
 }
+void AutoPumpLcd::PrintToRow(byte rowIndex, String text)
+{
+    if( rowIndex >= _rowCount)
+        return;
+    
+     ClearRow(rowIndex);
+    _lcd.setCursor(0, rowIndex);
+    _lcd.print(text);
+}
+
 
 #pragma endregion
 

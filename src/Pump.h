@@ -1,11 +1,7 @@
-#ifndef arduinoH
-#define arduinoH
-#include <Arduino.h>
-#endif
-
 #ifndef pumpH
 #define pumpH
 
+#include <Arduino.h>
 #include "enums.h"
 #include "converters.h"
 
@@ -16,7 +12,7 @@ private:
     bool _isWorking;
     unsigned long _timerInMilliseconds;
     StartTimerOption _startTimerOption = WhenPumpIsOff;
-
+    bool IsEnabled();
    
 public:
     unsigned long WorkTimeInSeconds = 30;
@@ -32,6 +28,8 @@ public:
 
     bool GetIsTimeForWatering();
     bool GetIsTimeToStopWatering();
+
+    String GetStatus();
 };
 
 #endif

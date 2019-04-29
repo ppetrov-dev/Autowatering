@@ -25,7 +25,8 @@
         return;
 
       auto currentMilliseconds = millis();
-      if(currentMilliseconds < _timeInMilliseconds)
+      
+      if(currentMilliseconds < _timeInMilliseconds + _timeoutInMilliseconds)
         return;
     
     _timeInMilliseconds = currentMilliseconds;

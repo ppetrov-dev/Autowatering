@@ -1,11 +1,7 @@
-#ifndef arduinoH
-#define arduinoH
-#include <Arduino.h>
-#endif
-
 #ifndef autoPumpLcdH
 #define autoPumpLcdH
 
+#include <Arduino.h>
 #include "LCD_1602_RUS.h"
 #include "enums.h"
 #include "converters.h"
@@ -40,7 +36,6 @@ private:
     void SwitchOn();
     void SwitchOff();
 
-    void ClearRow(byte rowIndex);
     void PrintArrowPosition();
     void ReprintArrowSpots();
     void PrintPauseRow();
@@ -65,6 +60,9 @@ public:
     int GetSelectedPumpIndex();
     void UpdateStateIfNeeded(AutoPumpState newState);
     void UpdateSelectedValues(int increment);
+    
+    void PrintToRow(byte rowIndex, String text);
+    void ClearRow(byte rowIndex);
     
     unsigned long ConvertWorkTimeToSeconds();
     unsigned long ConvertPauseTimeToSeconds();
