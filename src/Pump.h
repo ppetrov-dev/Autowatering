@@ -19,8 +19,8 @@ private:
     String ConvertMillisecondsToSecondsString(unsigned long milliseconds);
     String ConvertMillisecondsToStringTimeFormat(unsigned long milliseconds);
     String GetFormatedStringTime();
-    void SwitchOn();
-    void SwitchOff();
+    void Start();
+    void Stop();
 
 public:
     unsigned long WorkTimeInSeconds = 45;
@@ -30,8 +30,8 @@ public:
     void Init();
     bool GetIsWorking();
     
-    void ForceSwitchOn();
-    void ForceSwitchOff();
+    void ForceStart();
+    void ForceStop();
 
     String GetStatus();
     void Tick();

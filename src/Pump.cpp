@@ -19,7 +19,7 @@ bool Pump::GetIsWorking()
     return _isWorking;
 }
 
-void Pump::SwitchOn()
+void Pump::Start()
 {
     _isForcedlyStated = !IsTimeForWatering();
     digitalWrite(_pin, HIGH);
@@ -27,22 +27,22 @@ void Pump::SwitchOn()
     _startTimeInMilliseconds = millis();
 }
 
-void Pump::ForceSwitchOn()
+void Pump::ForceStart()
 {
     _isForcedlyStated = !IsTimeForWatering();
-    SwitchOn();
+    Start();
 }
-void Pump::SwitchOff()
+void Pump::Stop()
 {
     digitalWrite(_pin, LOW);
     _isWorking = false;
 
     _stopTimeInMilliseconds = millis();
 }
-void Pump::ForceSwitchOff()
+void Pump::ForceStop()
 {
     _isForcedlyStated = false;
-    SwitchOff();
+    Stop();
 }
 bool Pump::IsTimeForWatering()
 {
@@ -118,7 +118,7 @@ String Pump::GetFormatedStringTime()
 
 String Pump::GetStatus()
 {
-    if (!IsAutoWateringEnabled())
+    if (!IsAutoWateringEnabled() && !_isForcedlyStated)
         return "disabled";
 
     auto formatedStringTime = GetFormatedStringTime();
@@ -128,13 +128,13 @@ String Pump::GetStatus()
 void Pump::Tick(){
     if (IsTimeForWatering())
     {
-      SwitchOn();
+      Start();
       return;
     }
 
-    if (IsTimeToStopWatering())
+    if (IsTimeToStopWatering() && !_isForcedlyStated)
     {
-      SwitchOff();
+      Stop();
       return;
     }
 }

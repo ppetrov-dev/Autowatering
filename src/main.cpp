@@ -107,10 +107,10 @@ void setup()
   _autoPumpStateMachine.AttachOnLeftSettings(&OnStateMachineLeftSettings);
   _autoPumpStateMachine.AttachOnBeforeEnterToSettings([]() { UpdateSelectedValuesFromSelectedPump(); });
 
-  _pumpButton1.attachLongPressStart([]() { _pumps[0]->ForceSwitchOn(); });
-  _pumpButton1.attachLongPressStop([]() { _pumps[0]->ForceSwitchOff(); });
-  _pumpButton2.attachLongPressStart([]() { _pumps[1]->ForceSwitchOn(); });
-  _pumpButton2.attachLongPressStop([]() { _pumps[1]->ForceSwitchOff(); });
+  _pumpButton1.attachLongPressStart([]() { _pumps[0]->ForceStart(); });
+  _pumpButton1.attachLongPressStop([]() { _pumps[0]->ForceStop(); });
+  _pumpButton2.attachLongPressStart([]() { _pumps[1]->ForceStart(); });
+  _pumpButton2.attachLongPressStop([]() { _pumps[1]->ForceStop(); });
 
   _pumps[0] = &_pump1;
   _pumps[1] = &_pump2;
