@@ -2,7 +2,7 @@
 #define autoPumpLcdH
 
 #include <Arduino.h>
-#include "LCD_1602_RUS.h"
+#include <LiquidCrystal_I2C.h>
 #include "enums.h"
 #include "converters.h"
 #include "WorkTime.h"
@@ -18,7 +18,7 @@ private:
     autoPumpLcdCallback _onSelectedPumpChangedCallback;
 
     unsigned long _lastActivityTimeInMilliseconds;
-    LCD_1602_RUS _lcd;
+    LiquidCrystal_I2C _lcd;
     byte _columnCount;
     byte _rowCount;
     byte _pumpAmount = 1;
