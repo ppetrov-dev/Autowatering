@@ -1,7 +1,7 @@
 #ifndef settingsH
 #define settingsH
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define IS_LCD_AUTO_OFF 1
 #define IS_ENCODER_REVERSED 1

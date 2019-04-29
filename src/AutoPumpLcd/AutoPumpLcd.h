@@ -57,6 +57,7 @@ public:
     
     AutoPumpLcd(byte columnCount, byte rowCount);
     void Init(byte pumpAmount, AutoPumpState state);
+    void Refresh();
     int GetSelectedPumpIndex();
     void UpdateStateIfNeeded(AutoPumpState newState);
     void UpdateSelectedValues(int increment);

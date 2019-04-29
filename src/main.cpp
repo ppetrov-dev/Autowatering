@@ -1,5 +1,4 @@
 #include "OneButton.h"
-#include <EEPROM.h>
 #include "AutoPumpEncoder/AutoPumpEncoder.h"
 #include "AutoPumpLcd/AutoPumpLcd.h"
 #include "AutoPumpStateMachine/AutoPumpStateMachine.h"
@@ -8,6 +7,7 @@
 #include "enums.h"
 #include "converters.h"
 #include "Timer/Timer.h"
+#include "DataStorage/DataStorage.h"
 
 AutoPumpStateMachine _autoPumpStateMachine;
 AutoPumpEncoder _autoPumpEncoder = AutoPumpEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
@@ -19,30 +19,25 @@ Pump _pump2 = Pump(PIN_Pump2);
 AutoPumpLcd _autoPumpLcd = AutoPumpLcd(16, 2);
 Timer _timer;
 
-Pump *_pumps[PUPM_AMOUNT];
+DataStorage _dataStorage(PUPM_AMOUNT);
+Pump *_pumps[PUPM_AMOUNT]={ &_pump1, &_pump2};
 
 bool _isWatering;
 
-void UpdateDataInMemoryForSelectedPump()
-{
-  // EEPROM.updateLong(8 * _selectedPumpNumber, _pumpWaitTimesInMinutes[_selectedPumpNumber]);
-  // EEPROM.updateLong(8 * _selectedPumpNumber + 4, _pumpWorkTimesInMinutes[_selectedPumpNumber]);
-}
-
-void UpdateSelectedValuesToSelectedPump(unsigned long waitTimeInSeconds, unsigned long workTimeInSeconds)
-{
-  auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
-  auto pump = _pumps[pumpIndex];
-
-  pump->WaitTimeInMinutes = Converters::SecondsToMinutes(waitTimeInSeconds);
-  pump->WorkTimeInSeconds = workTimeInSeconds;
-}
-
-Pump *GetSelectedPump()
+Pump* GetSelectedPump()
 {
   auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
   auto pump = _pumps[pumpIndex];
   return pump;
+}
+
+void UpdateSelectedValuesToSelectedPump(unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds)
+{
+  auto pumpIndex = _autoPumpLcd.GetSelectedPumpIndex();
+  auto pump = _pumps[pumpIndex];
+
+  pump->WaitTimeInMinutes = waitTimeInMinutes;
+  pump->WorkTimeInSeconds = workTimeInSeconds;
 }
 
 void UpdateSelectedValuesFromSelectedPump()
@@ -80,6 +75,19 @@ void TryPrintSelectedPumpStatus()
   }
 }
 
+Data CreateData(unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds)
+{
+  Data data;
+  data.WaitTimeInMinutes = waitTimeInMinutes;
+  data.WorkTimeInSeconds = workTimeInSeconds;
+  return data;
+}
+void SaveDataIfNeeded(int index, unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds)
+{
+  auto data = CreateData(waitTimeInMinutes, workTimeInSeconds);
+  _dataStorage.SaveDataIfNeeded(index, data);
+}
+
 #pragma region AutoPumpStateMachine Handlers
 void OnStateChanged()
 {
@@ -88,16 +96,39 @@ void OnStateChanged()
 }
 void OnStateMachineLeftSettings()
 {
-  auto waitTimeInSeconds = _autoPumpLcd.ConvertWaitTimeToSeconds();
+  auto waitTimeInMinutes = Converters::SecondsToMinutes(_autoPumpLcd.ConvertWaitTimeToSeconds());
   auto workTimeInSeconds = _autoPumpLcd.ConvertWorkTimeToSeconds();
-  UpdateSelectedValuesToSelectedPump(waitTimeInSeconds, workTimeInSeconds);
+  UpdateSelectedValuesToSelectedPump(waitTimeInMinutes, workTimeInSeconds);
+  SaveDataIfNeeded(_autoPumpLcd.GetSelectedPumpIndex(), waitTimeInMinutes, workTimeInSeconds);
 }
 #pragma endregion
 
 void setup()
 {
-  if(DEBUG)
+  if (DEBUG)
     Serial.begin(9600);
+
+  _autoPumpLcd.IsAutoOff = IS_LCD_AUTO_OFF;
+  _autoPumpLcd.TimeoutInSeconds = Lcd_TIMEOUT_SECONDS;
+  _autoPumpLcd.Init(PUPM_AMOUNT, _autoPumpStateMachine.GetState());
+  _autoPumpLcd.AttachOnSelectedPumpChanged([]() { TryPrintSelectedPumpStatus(); });
+
+  _dataStorage.Init();
+
+  for (int i = 0; i < PUPM_AMOUNT; i++)
+  {
+    auto pump = _pumps[i];
+    pump->Init();
+    auto isDataReady = _dataStorage.GetIsReady(i);
+    if(isDataReady)
+      {
+        auto data = _dataStorage.GetData(i);
+        pump->WaitTimeInMinutes = data->WaitTimeInMinutes; 
+        pump->WorkTimeInSeconds = data->WorkTimeInSeconds; 
+      }
+    else
+      _dataStorage.SaveDataIfNeeded(i, CreateData(pump->WaitTimeInMinutes, pump->WorkTimeInSeconds));
+  }
 
   _autoPumpStateMachine.AttachOnIncreaseValue([]() { _autoPumpLcd.UpdateSelectedValues(1); });
   _autoPumpStateMachine.AttachOnDecreaseValue([]() { _autoPumpLcd.UpdateSelectedValues(-1); });
@@ -110,15 +141,6 @@ void setup()
   _pumpButton2.attachLongPressStart([]() { _pumps[1]->ForceStart(); });
   _pumpButton2.attachLongPressStop([]() { _pumps[1]->ForceStop(); });
 
-  _pumps[0] = &_pump1;
-  _pumps[1] = &_pump2;
-
-  for (byte i = 0; i < PUPM_AMOUNT; i++)
-  {
-    auto pump = _pumps[i];
-    pump->Init();
-  }
-
   _autoPumpEncoder.SetEncoderType(ENCODER_TYPE);
   _autoPumpEncoder.SetEncoderDirection(IS_ENCODER_REVERSED);
 
@@ -128,14 +150,11 @@ void setup()
   _autoPumpEncoder.AttachOnRightHoldTurn([]() { _autoPumpStateMachine.Run(EncoderHoldRightTurnCommand); });
   _autoPumpEncoder.AttachOnClick([]() { _autoPumpStateMachine.Run(EncoderClickCommand); });
 
-  _autoPumpLcd.IsAutoOff = IS_LCD_AUTO_OFF;
-  _autoPumpLcd.TimeoutInSeconds = Lcd_TIMEOUT_SECONDS;
-  _autoPumpLcd.Init(PUPM_AMOUNT, _autoPumpStateMachine.GetState());
-  _autoPumpLcd.AttachOnSelectedPumpChanged([]() { TryPrintSelectedPumpStatus(); });
-
   _timer.SetTimeout(1000);
   _timer.AttachOnTick([]() { TryPrintSelectedPumpStatus(); });
   _timer.Start();
+
+  _autoPumpLcd.Refresh();
 }
 
 void loop()
@@ -150,7 +169,7 @@ void loop()
   {
     auto pump = _pumps[i];
     if (_isWatering && IS_PARALLEL_WATERING_DISABLED && !pump->GetIsWorking())
-        continue;
+      continue;
 
     pump->Tick();
 

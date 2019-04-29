@@ -22,10 +22,15 @@ void AutoPumpLcd::Init(byte pumpAmount, AutoPumpState state)
 {
     _state = state;
     _pumpAmount = pumpAmount;
-    _lcd.init();
+     _lcd.init();
+}
+
+void AutoPumpLcd::Refresh()
+{
     PrintState();
     UpdateActivityTimeAndSwitchOnIfNeeded();
 }
+
 void AutoPumpLcd::SwitchOn()
 {
     _isOn = true;
