@@ -22,4 +22,10 @@ enum Command{
   EncoderHoldRightTurnCommand,
 };
 
+enum PumpMode{
+  Normal,
+  ForcedlyStarted,
+  ForcedlyStartedWithTimer
+};
+
 #endif

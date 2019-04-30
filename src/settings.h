@@ -7,6 +7,7 @@
 #define IS_ENCODER_REVERSED 1
 #define IS_PARALLEL_WATERING_DISABLED 1
 
+#define FORCEDLY_STARTED_PUMP_SECONDS 15
 #define Lcd_TIMEOUT_SECONDS 60
 #define ENCODER_TYPE 1 // 0 or 1, change the type If incorrect working
 

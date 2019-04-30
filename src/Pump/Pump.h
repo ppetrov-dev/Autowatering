@@ -10,7 +10,6 @@ class Pump
 private:
     byte _pin;
     bool _isWorking;
-    bool _isForcedlyStated;
     unsigned long _startTimeInMilliseconds = 0;
     unsigned long _stopTimeInMilliseconds = 0;
     bool IsAutoWateringEnabled();
@@ -19,19 +18,21 @@ private:
     String ConvertMillisecondsToSecondsString(unsigned long milliseconds);
     String ConvertMillisecondsToStringTimeFormat(unsigned long milliseconds);
     String GetFormatedStringTime();
+    unsigned long GetPeriodTimeInMilliseconds();
     void Start();
-    void Stop();
 
+    PumpMode _pumpMode = Normal;
+    unsigned long _forcedlyStartedTimerInSeconds = 0;
 public:
     unsigned long WorkTimeInSeconds = 45;
     unsigned long WaitTimeInMinutes = 1;
 
     Pump(byte pin);
-    void Init();
+    void Init(unsigned long forcedlyStartedTimerInSeconds);
     bool GetIsWorking();
     
-    void ForceStart();
-    void ForceStop();
+    void ForceStart(PumpMode pumpMode);
+    void Stop();
 
     String GetStatus();
     void Tick();

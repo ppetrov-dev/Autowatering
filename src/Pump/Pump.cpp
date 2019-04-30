@@ -8,10 +8,11 @@ bool Pump::IsAutoWateringEnabled()
 {
     return WorkTimeInSeconds != 0 && WaitTimeInMinutes != 0;
 }
-void Pump::Init()
+void Pump::Init(unsigned long forcedlyStartedTimerInSeconds)
 {
     pinMode(_pin, OUTPUT);
     digitalWrite(_pin, LOW);
+    _forcedlyStartedTimerInSeconds = forcedlyStartedTimerInSeconds;
 }
 
 bool Pump::GetIsWorking()
@@ -21,15 +22,14 @@ bool Pump::GetIsWorking()
 
 void Pump::Start()
 {
-    _isForcedlyStated = !IsTimeForWatering();
-    digitalWrite(_pin, HIGH);
     _isWorking = true;
+    digitalWrite(_pin, HIGH);
     _startTimeInMilliseconds = millis();
 }
 
-void Pump::ForceStart()
+void Pump::ForceStart(PumpMode pumpMode)
 {
-    _isForcedlyStated = !IsTimeForWatering();
+    _pumpMode = pumpMode;
     Start();
 }
 void Pump::Stop()
@@ -38,11 +38,7 @@ void Pump::Stop()
     _isWorking = false;
 
     _stopTimeInMilliseconds = millis();
-}
-void Pump::ForceStop()
-{
-    _isForcedlyStated = false;
-    Stop();
+    _pumpMode = Normal;
 }
 bool Pump::IsTimeForWatering()
 {
@@ -62,10 +58,10 @@ bool Pump::IsTimeToStopWatering()
         return false;
 
     auto currentMilliseconds = millis();
-    auto workTimeInMilliseconds = Converters::SecondsToMilliseconds(WorkTimeInSeconds);
+    auto periodTimeInMilliseconds =  GetPeriodTimeInMilliseconds();
     auto passedTimeinMilliseconds = currentMilliseconds - _startTimeInMilliseconds;
 
-    return passedTimeinMilliseconds >= workTimeInMilliseconds;
+    return passedTimeinMilliseconds >= periodTimeInMilliseconds;
 }
 
 String Pump::ConvertMillisecondsToStringTimeFormat(unsigned long milliseconds)
@@ -102,39 +98,51 @@ String Pump::ConvertMillisecondsToSecondsString(unsigned long milliseconds)
     auto seconds = Converters::MillisecondsToSeconds(milliseconds);
     return String(seconds) + " sec";
 }
+unsigned long Pump::GetPeriodTimeInMilliseconds()
+{
+    unsigned long periodTimeInMilliseconds = 0;
+    if (_pumpMode == ForcedlyStartedWithTimer)
+        periodTimeInMilliseconds = Converters::SecondsToMilliseconds(_forcedlyStartedTimerInSeconds);
+    else if (_isWorking)
+        periodTimeInMilliseconds = Converters::SecondsToMilliseconds(WorkTimeInSeconds);
+    else
+        periodTimeInMilliseconds = Converters::MinutesToMilliseconds(WaitTimeInMinutes);
 
+    return periodTimeInMilliseconds;
+}
 String Pump::GetFormatedStringTime()
 {
     auto currentMilliseconds = millis();
     auto timeInMilliseconds = _isWorking ? _startTimeInMilliseconds : _stopTimeInMilliseconds;
-    if (_isForcedlyStated)
+    if (_pumpMode == ForcedlyStarted)
         return ConvertMillisecondsToSecondsString(currentMilliseconds - timeInMilliseconds);
 
-    auto periodTimeInMilliseconds = _isWorking ? Converters::SecondsToMilliseconds(WorkTimeInSeconds) : Converters::MinutesToMilliseconds(WaitTimeInMinutes);
+    auto periodTimeInMilliseconds = GetPeriodTimeInMilliseconds();
     auto finalTimeInMilliseconds = periodTimeInMilliseconds + timeInMilliseconds;
-    auto remainingTimeInMilliseconds = currentMilliseconds < finalTimeInMilliseconds? finalTimeInMilliseconds - currentMilliseconds: 0;
+    auto remainingTimeInMilliseconds = currentMilliseconds < finalTimeInMilliseconds ? finalTimeInMilliseconds - currentMilliseconds : 0;
     return ConvertMillisecondsToStringTimeFormat(remainingTimeInMilliseconds);
 }
 
 String Pump::GetStatus()
 {
-    if (!IsAutoWateringEnabled() && !_isForcedlyStated)
+    if (!IsAutoWateringEnabled() && _pumpMode == Normal)
         return "disabled";
 
     auto formatedStringTime = GetFormatedStringTime();
     return String((_isWorking ? "working " : "waiting ") + formatedStringTime);
 }
 
-void Pump::Tick(){
+void Pump::Tick()
+{
     if (IsTimeForWatering())
     {
-      Start();
-      return;
+        Start();
+        return;
     }
 
-    if (IsTimeToStopWatering() && !_isForcedlyStated)
+    if (IsTimeToStopWatering() && _pumpMode != ForcedlyStarted)
     {
-      Stop();
-      return;
+        Stop();
+        return;
     }
 }

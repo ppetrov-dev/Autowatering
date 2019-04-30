@@ -118,7 +118,7 @@ void setup()
   for (int i = 0; i < PUPM_AMOUNT; i++)
   {
     auto pump = _pumps[i];
-    pump->Init();
+    pump->Init(FORCEDLY_STARTED_PUMP_SECONDS);
     auto isDataReady = _dataStorage.GetIsReady(i);
     if(isDataReady)
       {
@@ -136,10 +136,12 @@ void setup()
   _autoPumpStateMachine.AttachOnLeftSettings(&OnStateMachineLeftSettings);
   _autoPumpStateMachine.AttachOnBeforeEnterToSettings([]() { UpdateSelectedValuesFromSelectedPump(); });
 
-  _pumpButton1.attachLongPressStart([]() { _pumps[0]->ForceStart(); });
-  _pumpButton1.attachLongPressStop([]() { _pumps[0]->ForceStop(); });
-  _pumpButton2.attachLongPressStart([]() { _pumps[1]->ForceStart(); });
-  _pumpButton2.attachLongPressStop([]() { _pumps[1]->ForceStop(); });
+  _pumpButton1.attachLongPressStart([]() { _pumps[0]->ForceStart(ForcedlyStarted); });
+  _pumpButton1.attachLongPressStop([]() { _pumps[0]->Stop(); });
+  _pumpButton1.attachDoubleClick([](){  _pumps[0]->ForceStart(ForcedlyStartedWithTimer); });
+  _pumpButton2.attachLongPressStart([]() { _pumps[1]->ForceStart(ForcedlyStarted); });
+  _pumpButton2.attachLongPressStop([]() { _pumps[1]->Stop(); });
+  _pumpButton2.attachDoubleClick([](){  _pumps[1]->ForceStart(ForcedlyStartedWithTimer); });
 
   _autoPumpEncoder.SetEncoderType(ENCODER_TYPE);
   _autoPumpEncoder.SetEncoderDirection(IS_ENCODER_REVERSED);
