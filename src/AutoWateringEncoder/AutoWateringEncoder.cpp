@@ -1,47 +1,47 @@
-#include "AutoPumpEncoder.h"
+#include "AutoWateringEncoder.h"
 
-AutoPumpEncoder::AutoPumpEncoder(byte pinClk, byte pinDt, byte pinSw)
+AutoWateringEncoder::AutoWateringEncoder(byte pinClk, byte pinDt, byte pinSw)
     : _encoder(pinClk, pinDt, pinSw)
 {
 }
 
-void AutoPumpEncoder::SetEncoderType(bool isDefaultEncoderType = false)
+void AutoWateringEncoder::SetEncoderType(bool isDefaultEncoderType = false)
 {
     _encoder.setType(isDefaultEncoderType);
 }
-void AutoPumpEncoder::SetEncoderDirection(bool isReversedEncoderDirection = false)
+void AutoWateringEncoder::SetEncoderDirection(bool isReversedEncoderDirection = false)
 {
     _encoder.setDirection(isReversedEncoderDirection);
 }
 
-void AutoPumpEncoder::AttachOnLeftTurn(callbackFunction newFunction)
+void AutoWateringEncoder::AttachOnLeftTurn(callbackFunction newFunction)
 {
     _onLeftTurnCallbackFunc = newFunction;
 }
 
-void AutoPumpEncoder::AttachOnRightTurn(callbackFunction newFunction)
+void AutoWateringEncoder::AttachOnRightTurn(callbackFunction newFunction)
 {
     _onRightTurnCallbackFunc = newFunction;
 }
 
-void AutoPumpEncoder::AttachOnLeftHoldTurn(callbackFunction newFunction)
+void AutoWateringEncoder::AttachOnLeftHoldTurn(callbackFunction newFunction)
 {
     _onLeftHoldTurnCallbackFunc = newFunction;
 }
 
-void AutoPumpEncoder::AttachOnRightHoldTurn(callbackFunction newFunction)
+void AutoWateringEncoder::AttachOnRightHoldTurn(callbackFunction newFunction)
 {
     _onRightHoldTurnCallbackFunc = newFunction;
 }
-void AutoPumpEncoder::AttachOnClick(callbackFunction newFunction)
+void AutoWateringEncoder::AttachOnClick(callbackFunction newFunction)
 {
     _onClickCallbackFunc = newFunction;
 }
-bool AutoPumpEncoder::IsHold()
+bool AutoWateringEncoder::IsHold()
 {
     return _encoder.isPress();
 }
-void AutoPumpEncoder::Tick()
+void AutoWateringEncoder::Tick()
 {
      _encoder.tick();
 

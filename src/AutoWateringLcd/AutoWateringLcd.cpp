@@ -1,49 +1,49 @@
-#include "AutoPumpLcd.h"
+#include "AutoWateringLcd.h"
 
-AutoPumpLcd::AutoPumpLcd(byte columnCount, byte rowCount) : _lcd(0x27, columnCount, rowCount)
+AutoWateringLcd::AutoWateringLcd(byte columnCount, byte rowCount): _lcd(0x27, columnCount, rowCount)
 {
     _columnCount = columnCount;
     _rowCount = rowCount;
 }
 
-int AutoPumpLcd::GetSelectedPumpIndex()
+int AutoWateringLcd::GetSelectedPumpIndex()
 {
     return _selectedPumpIndex;
 }
 
-void AutoPumpLcd::ConstrainSelectedPumpIndex()
+void AutoWateringLcd::ConstrainSelectedPumpIndex()
 {
     if (_selectedPumpIndex > _pumpAmount - 1)
         _selectedPumpIndex = 0;
     if (_selectedPumpIndex < 0)
         _selectedPumpIndex = _pumpAmount - 1;
 }
-void AutoPumpLcd::Init(byte pumpAmount, AutoPumpState state)
+void AutoWateringLcd::Init(byte pumpAmount, AutoWateringState state)
 {
     _state = state;
     _pumpAmount = pumpAmount;
      _lcd.init();
 }
 
-void AutoPumpLcd::Refresh()
+void AutoWateringLcd::Refresh()
 {
     PrintState();
     UpdateActivityTimeAndSwitchOnIfNeeded();
 }
 
-void AutoPumpLcd::SwitchOn()
+void AutoWateringLcd::SwitchOn()
 {
     _isOn = true;
     _lcd.backlight();
 }
 
-void AutoPumpLcd::SwitchOff()
+void AutoWateringLcd::SwitchOff()
 {
     _isOn = false;
     _lcd.noBacklight();
 }
 
-void AutoPumpLcd::UpdateActivityTimeAndSwitchOnIfNeeded()
+void AutoWateringLcd::UpdateActivityTimeAndSwitchOnIfNeeded()
 {
     _lastActivityTimeInMilliseconds = millis();
     if (_isOn)
@@ -53,14 +53,14 @@ void AutoPumpLcd::UpdateActivityTimeAndSwitchOnIfNeeded()
 
 #pragma region Printing Methods
 
-void AutoPumpLcd::ClearRow(byte rowIndex)
+void AutoWateringLcd::ClearRow(byte rowIndex)
 {
     _lcd.setCursor(0, rowIndex);
     _lcd.print("                ");
     _lcd.setCursor(0, rowIndex);
 }
 
-void AutoPumpLcd::ReprintArrowSpots()
+void AutoWateringLcd::ReprintArrowSpots()
 {
     switch (_state)
     {
@@ -105,7 +105,7 @@ void AutoPumpLcd::ReprintArrowSpots()
     }
 }
 
-void AutoPumpLcd::PrintArrowPosition()
+void AutoWateringLcd::PrintArrowPosition()
 {
     ReprintArrowSpots();
 
@@ -136,7 +136,7 @@ void AutoPumpLcd::PrintArrowPosition()
     _lcd.write(126);
 }
 
-void AutoPumpLcd::PrintPumpName()
+void AutoWateringLcd::PrintPumpName()
 {
     _lcd.setCursor(0, 0);
     _lcd.print("Pump");
@@ -144,20 +144,20 @@ void AutoPumpLcd::PrintPumpName()
     _lcd.print(String(_selectedPumpIndex + 1));
 }
 
-void AutoPumpLcd::PrintSettings()
+void AutoWateringLcd::PrintSettings()
 {
     _lcd.setCursor(8, 0);
     _lcd.print("settings");
 }
 
-void AutoPumpLcd::PrintBack()
+void AutoWateringLcd::PrintBack()
 {
     _lcd.setCursor(8, 0);
     _lcd.print("   ");
     _lcd.setCursor(12, 0);
     _lcd.print("back");
 }
-void AutoPumpLcd::PrintWorkHours()
+void AutoWateringLcd::PrintWorkHours()
 {
     auto hours = _workTime.GetHours();
     _lcd.setCursor(8, 1);
@@ -165,7 +165,7 @@ void AutoPumpLcd::PrintWorkHours()
         _lcd.print(0);
     _lcd.print(hours);
 }
-void AutoPumpLcd::PrintWorkMinutes()
+void AutoWateringLcd::PrintWorkMinutes()
 {
     auto minutes = _workTime.GetMinutes();
     _lcd.setCursor(11, 1);
@@ -173,7 +173,7 @@ void AutoPumpLcd::PrintWorkMinutes()
         _lcd.print(0);
     _lcd.print(minutes);
 }
-void AutoPumpLcd::PrintWorkSeconds()
+void AutoWateringLcd::PrintWorkSeconds()
 {
     auto seconds = _workTime.GetSeconds();
     _lcd.setCursor(14, 1);
@@ -182,7 +182,7 @@ void AutoPumpLcd::PrintWorkSeconds()
     _lcd.print(seconds);
 }
 
-void AutoPumpLcd::PrintWaitDays()
+void AutoWateringLcd::PrintWaitDays()
 {
     auto days = _waitTime.GetDays();
     _lcd.setCursor(8, 1);
@@ -190,7 +190,7 @@ void AutoPumpLcd::PrintWaitDays()
     _lcd.print("d");
     _lcd.print(" ");
 }
-void AutoPumpLcd::PrintWaitHours()
+void AutoWateringLcd::PrintWaitHours()
 {
     auto hours = _waitTime.GetHours();
     _lcd.setCursor(11, 1);
@@ -198,7 +198,7 @@ void AutoPumpLcd::PrintWaitHours()
         _lcd.print(0);
     _lcd.print(hours);
 }
-void AutoPumpLcd::PrintWaitMinutes()
+void AutoWateringLcd::PrintWaitMinutes()
 {
     auto minutes = _waitTime.GetMinutes();
     _lcd.setCursor(14, 1);
@@ -207,7 +207,7 @@ void AutoPumpLcd::PrintWaitMinutes()
     _lcd.print(minutes);
 }
 
-void AutoPumpLcd::PrintWorkRow()
+void AutoWateringLcd::PrintWorkRow()
 {
     _lcd.setCursor(0, 1);
     _lcd.print("works");
@@ -216,7 +216,7 @@ void AutoPumpLcd::PrintWorkRow()
     PrintWorkSeconds();
 }
 
-void AutoPumpLcd::PrintWaitRow()
+void AutoWateringLcd::PrintWaitRow()
 {
     _lcd.setCursor(0, 1);
     _lcd.print("waits");
@@ -225,7 +225,7 @@ void AutoPumpLcd::PrintWaitRow()
     PrintWaitHours();
     PrintWaitMinutes();
 }
-void AutoPumpLcd::PrintState()
+void AutoWateringLcd::PrintState()
 {
     switch (_state)
     {
@@ -256,7 +256,7 @@ void AutoPumpLcd::PrintState()
 
     PrintArrowPosition();
 }
-String AutoPumpLcd::ConstrainInputText(String inputedText)
+String AutoWateringLcd::ConstrainInputText(String inputedText)
 {
     auto lenght = inputedText.length();
 
@@ -279,7 +279,7 @@ String AutoPumpLcd::ConstrainInputText(String inputedText)
     }
     return inputedText;
 }
-void AutoPumpLcd::PrintOnRow(byte rowIndex, String text)
+void AutoWateringLcd::PrintOnRow(byte rowIndex, String text)
 {
     if (rowIndex >= _rowCount)
         return;
@@ -290,12 +290,12 @@ void AutoPumpLcd::PrintOnRow(byte rowIndex, String text)
 
 #pragma endregion
 
-void AutoPumpLcd::AttachOnSelectedPumpChanged(autoPumpLcdCallback callback)
+void AutoWateringLcd::AttachOnSelectedPumpChanged(autoWateringLcdCallback callback)
 {
     _onSelectedPumpChangedCallback = callback;
 }
 
-void AutoPumpLcd::UpdateStateIfNeeded(AutoPumpState newState)
+void AutoWateringLcd::UpdateStateIfNeeded(AutoWateringState newState)
 {
     if (_state == newState)
         return;
@@ -306,7 +306,7 @@ void AutoPumpLcd::UpdateStateIfNeeded(AutoPumpState newState)
     UpdateActivityTimeAndSwitchOnIfNeeded();
 }
 
-void AutoPumpLcd::SetSelectedPumpIndex(int newPumpIndex)
+void AutoWateringLcd::SetSelectedPumpIndex(int newPumpIndex)
 {
     if (_selectedPumpIndex == newPumpIndex)
         return;
@@ -321,7 +321,7 @@ void AutoPumpLcd::SetSelectedPumpIndex(int newPumpIndex)
     _onSelectedPumpChangedCallback();
 }
 
-void AutoPumpLcd::UpdateSelectedValues(int increment)
+void AutoWateringLcd::UpdateSelectedValues(int increment)
 {
     if (_state == SelectPumpState)
         SetSelectedPumpIndex(_selectedPumpIndex + increment);
@@ -361,32 +361,32 @@ void AutoPumpLcd::UpdateSelectedValues(int increment)
     UpdateActivityTimeAndSwitchOnIfNeeded();
 }
 
-unsigned long AutoPumpLcd::ConvertWorkTimeToSeconds()
+unsigned long AutoWateringLcd::ConvertWorkTimeToSeconds()
 {
     return _workTime.ToSeconds();
 }
-unsigned long AutoPumpLcd::ConvertWaitTimeToSeconds()
+unsigned long AutoWateringLcd::ConvertWaitTimeToSeconds()
 {
     return _waitTime.ToSeconds();
 }
 
-void AutoPumpLcd::UpdateWorkTimeFromSeconds(unsigned long seconds)
+void AutoWateringLcd::UpdateWorkTimeFromSeconds(unsigned long seconds)
 {
     _workTime.UpdateValuesFromSeconds(seconds);
 }
 
-void AutoPumpLcd::UpdateWaitTimeFromSeconds(unsigned long seconds)
+void AutoWateringLcd::UpdateWaitTimeFromSeconds(unsigned long seconds)
 {
     _waitTime.UpdateValuesFromSeconds(seconds);
 }
 
-bool AutoPumpLcd::GetIsLcdTimeoutExpired()
+bool AutoWateringLcd::GetIsLcdTimeoutExpired()
 {
     auto timeoutInMilliseconds = Converters::SecondsToMilliseconds(TimeoutInSeconds);
     return millis() - _lastActivityTimeInMilliseconds >= timeoutInMilliseconds;
 }
 
-void AutoPumpLcd::Tick()
+void AutoWateringLcd::Tick()
 {
     if (!IsAutoOff || !_isOn || !GetIsLcdTimeoutExpired())
         return;

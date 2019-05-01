@@ -1,8 +1,8 @@
 #include "Timer.h"
 
-  void Timer::SetTimeout(unsigned long timeoutInMilliseconds)
+  void Timer::SetInterval(unsigned long intervalInMilliseconds)
   {
-      _timeoutInMilliseconds = timeoutInMilliseconds;
+      _intervalInMilliseconds = intervalInMilliseconds;
   }
   void Timer::Start()
   {
@@ -26,7 +26,7 @@
 
       auto currentMilliseconds = millis();
       
-      if(currentMilliseconds < _timeInMilliseconds + _timeoutInMilliseconds)
+      if(currentMilliseconds < _timeInMilliseconds + _intervalInMilliseconds)
         return;
     
     _timeInMilliseconds = currentMilliseconds;

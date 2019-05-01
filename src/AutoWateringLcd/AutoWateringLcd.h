@@ -1,5 +1,5 @@
-#ifndef autoPumpLcdH
-#define autoPumpLcdH
+#ifndef autoWateringLcdH
+#define autoWateringLcdH
 
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
@@ -9,13 +9,13 @@
 #include "Time/WaitTime.h"
 
 extern "C" {
-    typedef void (*autoPumpLcdCallback)(void);
+    typedef void (*autoWateringLcdCallback)(void);
 }
 
-class AutoPumpLcd
+class AutoWateringLcd
 {
 private:
-    autoPumpLcdCallback _onSelectedPumpChangedCallback;
+    autoWateringLcdCallback _onSelectedPumpChangedCallback;
 
     unsigned long _lastActivityTimeInMilliseconds;
     LiquidCrystal_I2C _lcd;
@@ -27,7 +27,7 @@ private:
     WaitTime _waitTime = WaitTime(1, 0, 0);
     int _selectedPumpIndex = 0;
 
-    enum AutoPumpState _state;
+    enum AutoWateringState _state;
     String ConstrainInputText(String inputedText);
     void ConstrainSelectedPumpIndex();
     void SetSelectedPumpIndex(int newPumpIndex);
@@ -55,11 +55,11 @@ public:
     bool IsAutoOff = true;
     byte TimeoutInSeconds = 30;
     
-    AutoPumpLcd(byte columnCount, byte rowCount);
-    void Init(byte pumpAmount, AutoPumpState state);
+    AutoWateringLcd(byte columnCount, byte rowCount);
+    void Init(byte pumpAmount, AutoWateringState state);
     void Refresh();
     int GetSelectedPumpIndex();
-    void UpdateStateIfNeeded(AutoPumpState newState);
+    void UpdateStateIfNeeded(AutoWateringState newState);
     void UpdateSelectedValues(int increment);
     
     void PrintOnRow(byte rowIndex, String text);
@@ -70,7 +70,7 @@ public:
     void UpdateWorkTimeFromSeconds(unsigned long seconds);
     void UpdateWaitTimeFromSeconds(unsigned long seconds);
 
-    void AttachOnSelectedPumpChanged(autoPumpLcdCallback callback);
+    void AttachOnSelectedPumpChanged(autoWateringLcdCallback callback);
     
     void Tick();
 };

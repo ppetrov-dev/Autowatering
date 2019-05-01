@@ -1,12 +1,12 @@
-#ifndef autoPumpEncoderH
-#define autoPumpEncoderH
+#ifndef autoWateringEncoderH
+#define autoWateringEncoderH
 #include "GyverEncoder.h"
 extern "C"
 {
     typedef void (*callbackFunction)(void);
 }
 
-class AutoPumpEncoder
+class AutoWateringEncoder
 {
 private:
     Encoder _encoder;
@@ -16,7 +16,7 @@ private:
     callbackFunction _onLeftHoldTurnCallbackFunc = NULL;
     callbackFunction _onClickCallbackFunc = NULL;
 public:
-    AutoPumpEncoder(byte pinClk, byte pinDt, byte pinSw);
+    AutoWateringEncoder(byte pinClk, byte pinDt, byte pinSw);
     bool IsHold();
     void Tick(void);
     void AttachOnClick(callbackFunction newFunction);

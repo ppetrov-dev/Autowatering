@@ -1,7 +1,7 @@
 #ifndef enumsH
 #define enumsH
 
-enum AutoPumpState
+enum AutoWateringState
 {
   SelectWaitDaysState,
   SelectWaitHoursState,
