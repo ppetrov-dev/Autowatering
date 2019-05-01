@@ -1,6 +1,6 @@
-#include "AutoPumpStateMachine.h"
+#include "AutoWateringStateMachine.h"
 
-void AutoPumpStateMachine::Run(Command command)
+void AutoWateringStateMachine::Run(Command command)
 {
     switch (command)
     {
@@ -23,13 +23,13 @@ void AutoPumpStateMachine::Run(Command command)
         break;
     }
 }
-AutoPumpState AutoPumpStateMachine::GetState()
+AutoWateringState AutoWateringStateMachine::GetState()
 {
-    return _autoPumpState;
+    return _autoWateringState;
 }
-void AutoPumpStateMachine::HandleEncoderClickIfNeeded()
+void AutoWateringStateMachine::HandleEncoderClickIfNeeded()
 {
-    switch (_autoPumpState)
+    switch (_autoWateringState)
     {
     case SelectSettingsState:
      if(_onBeforeEnterToSettingsCallback)
@@ -45,17 +45,17 @@ void AutoPumpStateMachine::HandleEncoderClickIfNeeded()
         break;
     }
 }
-void AutoPumpStateMachine::HandleEncoderLeftTurnIfNeeded()
+void AutoWateringStateMachine::HandleEncoderLeftTurnIfNeeded()
 {
     MovePreviousState();
 }
-void AutoPumpStateMachine::HandleEncoderRightTurnIfNeeded()
+void AutoWateringStateMachine::HandleEncoderRightTurnIfNeeded()
 {
     MoveNextState();
 }
 
-bool AutoPumpStateMachine::IsChangableValueState(){
- switch (_autoPumpState)
+bool AutoWateringStateMachine::IsChangableValueState(){
+ switch (_autoWateringState)
     {
     case SelectWaitDaysState:
     case SelectWaitHoursState:
@@ -69,42 +69,42 @@ bool AutoPumpStateMachine::IsChangableValueState(){
         return false;
     }
 }
-void AutoPumpStateMachine::HandleEncoderHoldLeftTurnIfNeeded()
+void AutoWateringStateMachine::HandleEncoderHoldLeftTurnIfNeeded()
 {
    if(!IsChangableValueState() || !_onDecreaseValueCallback)
     return;
 
     _onDecreaseValueCallback();
 }
-void AutoPumpStateMachine::HandleEncoderHoldRightTurnIfNeeded()
+void AutoWateringStateMachine::HandleEncoderHoldRightTurnIfNeeded()
 {
      if(!IsChangableValueState() || !_onIncreaseValueCallback)
     return;
 
     _onIncreaseValueCallback();
 }
-void AutoPumpStateMachine::SetState(AutoPumpState newState)
+void AutoWateringStateMachine::SetState(AutoWateringState newState)
 {
-    if(_autoPumpState == newState)
+    if(_autoWateringState == newState)
         return;
 
-    auto oldState = _autoPumpState;
-    _autoPumpState = newState;
+    auto oldState = _autoWateringState;
+    _autoWateringState = newState;
 
     if (_onStateChangedCallback)
         _onStateChangedCallback();
 }
-void AutoPumpStateMachine::MoveNextState()
+void AutoWateringStateMachine::MoveNextState()
 {
     SetState(GetNextState());
 }
-void AutoPumpStateMachine::MovePreviousState()
+void AutoWateringStateMachine::MovePreviousState()
 {
     SetState(GetPreviousState());
 }
-AutoPumpState AutoPumpStateMachine::GetNextState()
+AutoWateringState AutoWateringStateMachine::GetNextState()
 {
-    switch (_autoPumpState)
+    switch (_autoWateringState)
     {
     case SelectPumpState:
         return SelectSettingsState;
@@ -127,9 +127,9 @@ AutoPumpState AutoPumpStateMachine::GetNextState()
         return SelectBackState;        
     }
 }
-AutoPumpState AutoPumpStateMachine::GetPreviousState()
+AutoWateringState AutoWateringStateMachine::GetPreviousState()
 {
-    switch (_autoPumpState)
+    switch (_autoWateringState)
     {
     case SelectPumpState:
         return SelectSettingsState;
@@ -153,23 +153,23 @@ AutoPumpState AutoPumpStateMachine::GetPreviousState()
     }
 }
 
-void AutoPumpStateMachine::AttachOnStateChanged(autoPumpStateMachineCallback callback)
+void AutoWateringStateMachine::AttachOnStateChanged(autoWateringStateMachineCallback callback)
 {
     _onStateChangedCallback = callback;
 }
-void AutoPumpStateMachine::AttachOnDecreaseValue(autoPumpStateMachineCallback callback)
+void AutoWateringStateMachine::AttachOnDecreaseValue(autoWateringStateMachineCallback callback)
 {
     _onDecreaseValueCallback = callback;
 }
-void AutoPumpStateMachine::AttachOnIncreaseValue(autoPumpStateMachineCallback callback)
+void AutoWateringStateMachine::AttachOnIncreaseValue(autoWateringStateMachineCallback callback)
 {
     _onIncreaseValueCallback = callback;
 }
-void AutoPumpStateMachine::AttachOnLeftSettings(autoPumpStateMachineCallback callback)
+void AutoWateringStateMachine::AttachOnLeftSettings(autoWateringStateMachineCallback callback)
 {
     _onLeftSettingsCallback = callback;
 }
-void AutoPumpStateMachine::AttachOnBeforeEnterToSettings(autoPumpStateMachineCallback callback)
+void AutoWateringStateMachine::AttachOnBeforeEnterToSettings(autoWateringStateMachineCallback callback)
 {
     _onBeforeEnterToSettingsCallback = callback;
 }

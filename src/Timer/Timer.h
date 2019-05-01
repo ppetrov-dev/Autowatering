@@ -14,9 +14,9 @@ private:
     timerCallback _onTickCallback;
     bool _isStarted;
     unsigned long _timeInMilliseconds = 0;
-    unsigned long _timeoutInMilliseconds = 1000;
+    unsigned long _intervalInMilliseconds = 1000;
 public:
-    void SetTimeout(unsigned long timeoutInMilliseconds);
+    void SetInterval(unsigned long timeoutInMilliseconds);
     void Start();
     void Stop();
     void AttachOnTick(timerCallback callback);
