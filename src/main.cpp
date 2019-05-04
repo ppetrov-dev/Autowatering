@@ -92,7 +92,7 @@ void SaveDataIfNeeded(int index, unsigned long waitTimeInMinutes, unsigned long 
 #pragma region AutoWateringStateMachine Handlers
 void OnStateChanged()
 {
-  _autoWateringLcd.UpdateStateIfNeeded(_autoWateringStateMachine.GetState());
+  _autoWateringLcd.UpdateState(_autoWateringStateMachine.GetState());
   TryPrintSelectedPumpStatus();
 }
 void OnStateMachineLeftSettings()
@@ -128,7 +128,7 @@ void setup()
 
   _autoWateringLcd.IsAutoOff = IS_LCD_AUTO_OFF;
   _autoWateringLcd.TimeoutInSeconds = Lcd_TIMEOUT_SECONDS;
-  _autoWateringLcd.Init(PUPM_AMOUNT, _autoWateringStateMachine.GetState());
+  _autoWateringLcd.Init(PUPM_AMOUNT);
   _autoWateringLcd.AttachOnSelectedPumpChanged([]() { TryPrintSelectedPumpStatus(); });
 
   _dataStorage.Init();
@@ -148,8 +148,8 @@ void setup()
       _dataStorage.SaveDataIfNeeded(i, CreateData(pump->WaitTimeInMinutes, pump->WorkTimeInSeconds));
   }
 
-  _autoWateringStateMachine.AttachOnIncreaseValue([]() { _autoWateringLcd.UpdateSelectedValues(1); });
-  _autoWateringStateMachine.AttachOnDecreaseValue([]() { _autoWateringLcd.UpdateSelectedValues(-1); });
+  _autoWateringStateMachine.AttachOnIncreaseValue([]() { _autoWateringLcd.UpdateSelectedValues(_autoWateringStateMachine.GetState(), 1); });
+  _autoWateringStateMachine.AttachOnDecreaseValue([]() { _autoWateringLcd.UpdateSelectedValues(_autoWateringStateMachine.GetState(), -1); });
   _autoWateringStateMachine.AttachOnStateChanged(&OnStateChanged);
   _autoWateringStateMachine.AttachOnLeftSettings(&OnStateMachineLeftSettings);
   _autoWateringStateMachine.AttachOnBeforeEnterToSettings([]() { UpdateSelectedValuesFromSelectedPump(); });
@@ -174,7 +174,7 @@ void setup()
   _timer.AttachOnTick([]() { TryPrintSelectedPumpStatus(); });
   _timer.Start();
 
-  _autoWateringLcd.Refresh();
+  _autoWateringLcd.Refresh(_autoWateringStateMachine.GetState());
 }
 
 void loop()
