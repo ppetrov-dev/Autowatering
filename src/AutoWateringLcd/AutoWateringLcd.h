@@ -27,7 +27,6 @@ private:
     WaitTime _waitTime = WaitTime(1, 0, 0);
     int _selectedPumpIndex = 0;
 
-    enum AutoWateringState _state;
     String ConstrainInputText(String inputedText);
     void ConstrainSelectedPumpIndex();
     void SetSelectedPumpIndex(int newPumpIndex);
@@ -36,14 +35,14 @@ private:
     void SwitchOn();
     void SwitchOff();
 
-    void PrintArrowPosition();
-    void ReprintArrowSpots();
+    void PrintArrowPosition(AutoWateringState state);
+    void ReprintArrowSpots(AutoWateringState state);
     void PrintWaitRow();
     void PrintWorkRow();
     void PrintPumpName();
     void PrintSettings();
     void PrintBack();
-    void PrintState();
+    void PrintState(AutoWateringState state);
 
     void PrintWaitDays();
     void PrintWaitHours();
@@ -56,11 +55,11 @@ public:
     byte TimeoutInSeconds = 30;
     
     AutoWateringLcd(byte columnCount, byte rowCount);
-    void Init(byte pumpAmount, AutoWateringState state);
-    void Refresh();
+    void Init(byte pumpAmount);
+    void Refresh(AutoWateringState state);
     int GetSelectedPumpIndex();
-    void UpdateStateIfNeeded(AutoWateringState newState);
-    void UpdateSelectedValues(int increment);
+    void UpdateState(AutoWateringState newState);
+    void UpdateSelectedValues(AutoWateringState state, int increment);
     
     void PrintOnRow(byte rowIndex, String text);
     void ClearRow(byte rowIndex);

@@ -2,10 +2,10 @@
 
 The project based on Alex Gyvyer' project (https://alexgyver.ru/auto-pumps/) for plants autowatering. All the code was modified. For programming I use VS Code + Platform IO (https://platformio.org/).
 
-Potentially many pumps could be added but I assembled the circuit and designed the box (https://www.thingiverse.com/thing:3607432) for 2 pumps. Also I've added 2 buttons for force staring of the pumps.
+Potentially many pumps could be added but I assembled the circuit and designed the box (https://www.thingiverse.com/thing:3607432) for 2 pumps. Also I've added 2 buttons for force starting of the pumps.
 
-## Main improvements were made:
-* Object-oriented code, as much as possible
+## The main improvements:
+* Object-oriented and readable code, as much as possible
 * Separated file for settings (pins, timeout time etc)
 * Separated menu in the system interface to set working and wating times of pumps
 * Saving data in Arduino memory (EEPROM) happens when an user leaves menu settings and if changes are

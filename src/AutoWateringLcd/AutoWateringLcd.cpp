@@ -18,16 +18,15 @@ void AutoWateringLcd::ConstrainSelectedPumpIndex()
     if (_selectedPumpIndex < 0)
         _selectedPumpIndex = _pumpAmount - 1;
 }
-void AutoWateringLcd::Init(byte pumpAmount, AutoWateringState state)
+void AutoWateringLcd::Init(byte pumpAmount)
 {
-    _state = state;
     _pumpAmount = pumpAmount;
      _lcd.init();
 }
 
-void AutoWateringLcd::Refresh()
+void AutoWateringLcd::Refresh(AutoWateringState state)
 {
-    PrintState();
+    PrintState(state);
     UpdateActivityTimeAndSwitchOnIfNeeded();
 }
 
@@ -60,9 +59,9 @@ void AutoWateringLcd::ClearRow(byte rowIndex)
     _lcd.setCursor(0, rowIndex);
 }
 
-void AutoWateringLcd::ReprintArrowSpots()
+void AutoWateringLcd::ReprintArrowSpots(AutoWateringState state)
 {
-    switch (_state)
+    switch (state)
     {
     case SelectPumpState:
     case SelectSettingsState:
@@ -105,11 +104,11 @@ void AutoWateringLcd::ReprintArrowSpots()
     }
 }
 
-void AutoWateringLcd::PrintArrowPosition()
+void AutoWateringLcd::PrintArrowPosition(AutoWateringState state)
 {
-    ReprintArrowSpots();
+    ReprintArrowSpots(state);
 
-    switch (_state)
+    switch (state)
     {
     case SelectPumpState:
         _lcd.setCursor(4, 0);
@@ -225,9 +224,9 @@ void AutoWateringLcd::PrintWaitRow()
     PrintWaitHours();
     PrintWaitMinutes();
 }
-void AutoWateringLcd::PrintState()
+void AutoWateringLcd::PrintState(AutoWateringState state)
 {
-    switch (_state)
+    switch (state)
     {
     case SelectSettingsState:
     case SelectPumpState:
@@ -254,7 +253,7 @@ void AutoWateringLcd::PrintState()
         break;
     }
 
-    PrintArrowPosition();
+    PrintArrowPosition(state);
 }
 String AutoWateringLcd::ConstrainInputText(String inputedText)
 {
@@ -295,14 +294,9 @@ void AutoWateringLcd::AttachOnSelectedPumpChanged(autoWateringLcdCallback callba
     _onSelectedPumpChangedCallback = callback;
 }
 
-void AutoWateringLcd::UpdateStateIfNeeded(AutoWateringState newState)
+void AutoWateringLcd::UpdateState(AutoWateringState newState)
 {
-    if (_state == newState)
-        return;
-
-    _state = newState;
-
-    PrintState();
+    PrintState(newState);
     UpdateActivityTimeAndSwitchOnIfNeeded();
 }
 
@@ -321,13 +315,13 @@ void AutoWateringLcd::SetSelectedPumpIndex(int newPumpIndex)
     _onSelectedPumpChangedCallback();
 }
 
-void AutoWateringLcd::UpdateSelectedValues(int increment)
+void AutoWateringLcd::UpdateSelectedValues(AutoWateringState state, int increment)
 {
-    if (_state == SelectPumpState)
+    if (state == SelectPumpState)
         SetSelectedPumpIndex(_selectedPumpIndex + increment);
     else
     {
-        switch (_state)
+        switch (state)
         {
         case SelectWaitDaysState:
             _waitTime.ChangeDays(increment);
