@@ -92,7 +92,8 @@ void SaveDataIfNeeded(int index, unsigned long waitTimeInMinutes, unsigned long 
 #pragma region AutoWateringStateMachine Handlers
 void OnStateChanged()
 {
-  _autoWateringLcd.UpdateState(_autoWateringStateMachine.GetState());
+  auto currentState = _autoWateringStateMachine.GetState();
+  _autoWateringLcd.UpdateState(currentState);
   TryPrintSelectedPumpStatus();
 }
 void OnStateMachineLeftSettings()
@@ -154,6 +155,8 @@ void setup()
   _autoWateringStateMachine.AttachOnLeftSettings(&OnStateMachineLeftSettings);
   _autoWateringStateMachine.AttachOnBeforeEnterToSettings([]() { UpdateSelectedValuesFromSelectedPump(); });
 
+  pinMode(PIN_Button1, INPUT_PULLUP);
+  pinMode(PIN_Button2, INPUT_PULLUP);
   _pumpButton1.attachLongPressStart([]() { OnButtonLongPressStart(0); });
   _pumpButton1.attachLongPressStop([]() { OnButtonLongPressStop(0);});
   _pumpButton1.attachDoubleClick([](){ OnButtonDoubleClick(0);});
@@ -177,25 +180,45 @@ void setup()
   _autoWateringLcd.Refresh(_autoWateringStateMachine.GetState());
 }
 
-void loop()
-{
-  _autoWateringEncoder.Tick();
-  _autoWateringLcd.Tick();
-  _timer.Tick();
-
-  for (int i = 0; i < PUPM_AMOUNT; i++)
+void HandleButtonsTick(){
+   for (int i = 0; i < PUPM_AMOUNT; i++)
   {
     auto button = _buttons[i];
     button->tick();
+  }
+}
 
+void UpdateIsWatering()
+{
+  for (int i = 0; i < PUPM_AMOUNT; i++)
+  {
+    auto pump = _pumps[i];
+    _isWatering = pump->GetIsWorking();
+    if (_isWatering)
+      break;
+  }
+}
+
+void HandlePumpsTick(){
+  for (int i = 0; i < PUPM_AMOUNT; i++)
+  {
     auto pump = _pumps[i];
     if (_isWatering && IS_PARALLEL_WATERING_DISABLED && !pump->GetIsWorking())
       continue;
 
     pump->Tick();
 
-    _isWatering = pump->GetIsWorking();
-    if (_isWatering && IS_PARALLEL_WATERING_DISABLED)
+    if(pump->GetIsWorking() && IS_PARALLEL_WATERING_DISABLED)
       break;
   }
+}
+void loop()
+{
+  _autoWateringEncoder.Tick();
+  _autoWateringLcd.Tick();
+  _timer.Tick();
+
+  HandleButtonsTick();
+  UpdateIsWatering();
+  HandlePumpsTick();
 }
