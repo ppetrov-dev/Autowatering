@@ -88,7 +88,6 @@ void AutoWateringStateMachine::SetState(AutoWateringState newState)
     if(_autoWateringState == newState)
         return;
 
-    auto oldState = _autoWateringState;
     _autoWateringState = newState;
 
     if (_onStateChangedCallback)
@@ -153,23 +152,23 @@ AutoWateringState AutoWateringStateMachine::GetPreviousState()
     }
 }
 
-void AutoWateringStateMachine::AttachOnStateChanged(autoWateringStateMachineCallback callback)
+void AutoWateringStateMachine::AttachOnStateChanged(stateMachineCallback callback)
 {
     _onStateChangedCallback = callback;
 }
-void AutoWateringStateMachine::AttachOnDecreaseValue(autoWateringStateMachineCallback callback)
+void AutoWateringStateMachine::AttachOnDecreaseValue(stateMachineCallback callback)
 {
     _onDecreaseValueCallback = callback;
 }
-void AutoWateringStateMachine::AttachOnIncreaseValue(autoWateringStateMachineCallback callback)
+void AutoWateringStateMachine::AttachOnIncreaseValue(stateMachineCallback callback)
 {
     _onIncreaseValueCallback = callback;
 }
-void AutoWateringStateMachine::AttachOnLeftSettings(autoWateringStateMachineCallback callback)
+void AutoWateringStateMachine::AttachOnLeftSettings(stateMachineCallback callback)
 {
     _onLeftSettingsCallback = callback;
 }
-void AutoWateringStateMachine::AttachOnBeforeEnterToSettings(autoWateringStateMachineCallback callback)
+void AutoWateringStateMachine::AttachOnBeforeEnterToSettings(stateMachineCallback callback)
 {
     _onBeforeEnterToSettingsCallback = callback;
 }
