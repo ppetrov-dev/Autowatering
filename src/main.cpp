@@ -1,5 +1,5 @@
 #include "OneButton.h"
-#include "AutoWateringEncoder/AutoWateringEncoder.h"
+#include "MyEncoder/MyEncoder.h"
 #include "AutoWateringLcd/AutoWateringLcd.h"
 #include "AutoWateringStateMachine/AutoWateringStateMachine.h"
 #include "Pump/Pump.h"
@@ -9,8 +9,8 @@
 #include "Timer/Timer.h"
 #include "DataStorage/DataStorage.h"
 
-AutoWateringStateMachine _autoWateringStateMachine;
-AutoWateringEncoder _autoWateringEncoder = AutoWateringEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
+AutoWateringStateMachine _autoWateringAutoWateringStateMachine;
+MyEncoder _autoWateringEncoder = MyEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
 
 OneButton _pumpButton1 = OneButton(PIN_Button1, true, true);
 Pump _pump1 = Pump(PIN_Pump1);
