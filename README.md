@@ -4,7 +4,13 @@ The project based on Alex Gyvyer' project (https://github.com/AlexGyver/Auto-Pum
 
 Potentially many pumps could be added but I assembled the circuit and designed the box (https://www.thingiverse.com/thing:3607432) for 2 pumps. But this box was too small to put there all cables and I used another one from AliExpress. Also I've added 2 buttons for force starting of the pumps.
 
-## The main improvements
+* [The main improvements](#The-main-improvements)
+* [What you need to repeat](#what-you-need-to-repeats)
+* [How to connect](#how-to-connect)
+* [What next](#what-next)
+
+<a id="The-main-improvements"></a>
+## The main improvements 
 * Object-oriented and readable code, as much as possible
 * Separated file for settings (pins, timeout time etc)
 * Separated menu in the system interface to set working and wating times of pumps
@@ -14,6 +20,7 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * Forse start/stop pumps by buttons commands (double click, hold press/release)
 * Different timers display remaining time to change a pump state, force start timer in seconds 
 
+<a id="what-you-need-to-repeats"></a>
 ## What you need to repeat
 ![alt text][whatYouNeed]
 * Arduino Nano
@@ -30,6 +37,7 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * Check valves x2 (optional)
 * Water hose (optional)
 
+<a id="how-to-connect"></a>
 ## How to connect
 See scheme of original project (https://github.com/AlexGyver/Auto-Pumps). I've done the same but I have 2 channel relay without diodes inside and I had to add them to the pumps outs. It looks like this:
 ![alt text][howToConnectDiodes]
@@ -47,7 +55,7 @@ And I have different pins to connect modules you can find them in "settings.h" f
 #define PIN_Pump1 7
 #define PIN_Pump2 8
 ```
-
+<a id="what-next"></a>
 ## What next
 I don't have any certain plans for the project. I'd add a soil moisture sensor or/and real-time clocks module. Most likely it will be connected with the Internet. I'll create an account in Twitter for my plants and they will post how comfortable they live. Will see.
 
