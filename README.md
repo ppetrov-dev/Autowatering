@@ -51,6 +51,6 @@ And I have different pins to connect modules you can find them in "settings.h" f
 ## What next
 I don't have any certain plans for the project. I'd add a soil moisture sensor or/and real-time clocks module. Most likely it will be connected with the Internet. I'll create an account in Twitter for my plants and they will post how comfortable they live. Will see.
 
-[whatYouNeed]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/WhatYouNeed.png
-[howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/HowToConnectDiodes.jpg
-[howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/HowToConnectCapacitor.png
+[whatYouNeed]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.0/Screenshots/WhatYouNeed.png
+[howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.0/Screenshots/HowToConnectDiodes.jpg
+[howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.0/Screenshots/HowToConnectCapacitor.png
