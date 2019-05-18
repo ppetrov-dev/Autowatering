@@ -4,17 +4,17 @@
 #include "enums.h"
 
 extern "C" {
-    typedef void (*autoWateringStateMachineCallback)(void);
+    typedef void (*stateMachineCallback)(void);
 }
 
 class AutoWateringStateMachine
 {
 private:
-    autoWateringStateMachineCallback _onStateChangedCallback;
-    autoWateringStateMachineCallback _onDecreaseValueCallback;
-    autoWateringStateMachineCallback _onIncreaseValueCallback;
-    autoWateringStateMachineCallback _onLeftSettingsCallback;
-    autoWateringStateMachineCallback _onBeforeEnterToSettingsCallback;
+    stateMachineCallback _onStateChangedCallback;
+    stateMachineCallback _onDecreaseValueCallback;
+    stateMachineCallback _onIncreaseValueCallback;
+    stateMachineCallback _onLeftSettingsCallback;
+    stateMachineCallback _onBeforeEnterToSettingsCallback;
 
     enum AutoWateringState _autoWateringState = SelectPumpState; 
 
@@ -35,11 +35,11 @@ public:
     void Run(Command command);
     AutoWateringState GetState();
 
-    void AttachOnStateChanged(autoWateringStateMachineCallback callback);
-    void AttachOnDecreaseValue(autoWateringStateMachineCallback callback);
-    void AttachOnIncreaseValue(autoWateringStateMachineCallback callback);
-    void AttachOnLeftSettings(autoWateringStateMachineCallback callback);
-    void AttachOnBeforeEnterToSettings(autoWateringStateMachineCallback callback);
+    void AttachOnStateChanged(stateMachineCallback callback);
+    void AttachOnDecreaseValue(stateMachineCallback callback);
+    void AttachOnIncreaseValue(stateMachineCallback callback);
+    void AttachOnLeftSettings(stateMachineCallback callback);
+    void AttachOnBeforeEnterToSettings(stateMachineCallback callback);
 };
 
 
