@@ -15,6 +15,7 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * Different timers display remaining time to change a pump state, force start timer in seconds 
 
 ## What you need to repeat
+![alt text][whatYouNeed]
 * Arduino Nano
 * 2 channel relay
 * Lcd1602 module with I2C
@@ -29,5 +30,27 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * Check valves x2 (optional)
 * Water hose (optional)
 
+## How to connect
+See scheme of original project (https://github.com/AlexGyver/Auto-Pumps). I've done the same but I have 2 channel relay without diodes inside and I had to add them to the pumps outs. It looks like this:
+![alt text][howToConnectDiodes]
+
+Also I added capacitor in the scheme and connected it to arduino outs:
+![alt text][howToConnectCapacitor]
+
+And I have different pins to connect modules you can find them in "settings.h" file:
+```C++
+#define PIN_EncoderClk 9
+#define PIN_EncoderDt 10
+#define PIN_EncoderSw 11
+#define PIN_Button1 5
+#define PIN_Button2 6
+#define PIN_Pump1 7
+#define PIN_Pump2 8
+```
+
 ## What next
 I don't have any certain plans for the project. I'd add a soil moisture sensor or/and real-time clocks module. Most likely it will be connected with the Internet. I'll create an account in Twitter for my plants and they will post how comfortable they live. Will see.
+
+[whatYouNeed]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/WhatYouNeed.png
+[howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/HowToConnectDiodes.jpg
+[howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/HowToConnectCapacitor.png
