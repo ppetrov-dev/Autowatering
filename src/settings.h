@@ -11,13 +11,14 @@
 #define Lcd_TIMEOUT_SECONDS 60
 #define ENCODER_TYPE 1 // 0 or 1, change the type If incorrect working
 
-#define PIN_EncoderClk 9
-#define PIN_EncoderDt 10
-#define PIN_EncoderSw 11
+#define PIN_EncoderClk 2
+#define PIN_EncoderDt 3
+#define PIN_EncoderSw 4
+
 #define PIN_Button1 5
 #define PIN_Button2 6
-#define PIN_Pump1 7
-#define PIN_Pump2 8
+
+#define PIN_FirstPump 7
 #define PUPM_AMOUNT 2
 
 #endif
