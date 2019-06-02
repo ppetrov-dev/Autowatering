@@ -1,23 +1,23 @@
 #include "OneButton.h"
-#include "MyEncoder/MyEncoder.h"
+#include "MyRotaryEncoder.h"
+#include "MyTimer.h"
 #include "AutoWateringLcd/AutoWateringLcd.h"
 #include "AutoWateringStateMachine/AutoWateringStateMachine.h"
 #include "Pump/Pump.h"
 #include "settings.h"
 #include "enums.h"
 #include "converters.h"
-#include "Timer/Timer.h"
 #include "DataStorage/DataStorage.h"
 
-AutoWateringStateMachine _autoWateringAutoWateringStateMachine;
-MyEncoder _autoWateringEncoder = MyEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
+AutoWateringStateMachine _autoWateringStateMachine;
+MyRotaryEncoder _autoWateringEncoder = MyRotaryEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
 
 OneButton _pumpButton1 = OneButton(PIN_Button1, true, true);
 Pump _pump1 = Pump(PIN_Pump1);
 OneButton _pumpButton2 = OneButton(PIN_Button2, true, true);
 Pump _pump2 = Pump(PIN_Pump2);
 AutoWateringLcd _autoWateringLcd = AutoWateringLcd(16, 2);
-Timer _timer;
+MyTimer _timer;
 
 DataStorage _dataStorage(PUPM_AMOUNT);
 Pump *_pumps[PUPM_AMOUNT]={ &_pump1, &_pump2};
@@ -174,7 +174,7 @@ void setup()
   _autoWateringEncoder.AttachOnClick([]() { _autoWateringStateMachine.Run(EncoderClickCommand); });
 
   _timer.SetInterval(1000);
-  _timer.AttachOnTick([]() { TryPrintSelectedPumpStatus(); });
+  _timer.AttachOnTick(&TryPrintSelectedPumpStatus);
   _timer.Start();
 
   _autoWateringLcd.Refresh(_autoWateringStateMachine.GetState());
