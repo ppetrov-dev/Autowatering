@@ -1,6 +1,8 @@
 #ifndef settingsH
 #define settingsH
 
+#include "enums.h"
+
 #define DEBUG 0
 
 #define IS_LCD_AUTO_OFF 1
@@ -20,5 +22,7 @@
 
 #define PIN_FirstPump 7
 #define PUPM_AMOUNT 2
+
+#define RELAY_TYPE HighLevel
 
 #endif

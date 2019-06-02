@@ -134,7 +134,7 @@ void setup()
   {
     auto pump = new Pump(PIN_FirstPump + i);
     _pumps[i] = pump;
-    pump->Init(FORCEDLY_STARTED_PUMP_SECONDS);
+    pump->Init(FORCEDLY_STARTED_PUMP_SECONDS, RELAY_TYPE);
     auto isDataReady = _dataStorage.GetIsReady(i);
     if (isDataReady)
     {

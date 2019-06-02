@@ -8,11 +8,12 @@ bool Pump::IsAutoWateringEnabled()
 {
     return WorkTimeInSeconds != 0 && WaitTimeInMinutes != 0;
 }
-void Pump::Init(unsigned long forcedlyStartedTimerInSeconds)
+void Pump::Init(unsigned long forcedlyStartedTimerInSeconds, RelayType relayType)
 {
     pinMode(_pin, OUTPUT);
-    digitalWrite(_pin, LOW);
+    _relayType = relayType;
     _forcedlyStartedTimerInSeconds = forcedlyStartedTimerInSeconds;
+    Stop();
 }
 
 bool Pump::GetIsWorking()
@@ -22,8 +23,9 @@ bool Pump::GetIsWorking()
 
 void Pump::Start()
 {
+    auto stateWhenOn = _relayType == HighLevel ? LOW : HIGH;
     _isWorking = true;
-    digitalWrite(_pin, HIGH);
+    digitalWrite(_pin, stateWhenOn);
     _startTimeInMilliseconds = millis();
 }
 
@@ -34,7 +36,8 @@ void Pump::ForceStart(PumpMode pumpMode)
 }
 void Pump::Stop()
 {
-    digitalWrite(_pin, LOW);
+    auto stateWhenOff = _relayType == HighLevel? HIGH: LOW;
+    digitalWrite(_pin, stateWhenOff);
     _isWorking = false;
 
     _stopTimeInMilliseconds = millis();
