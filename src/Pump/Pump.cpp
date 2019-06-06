@@ -49,7 +49,7 @@ bool Pump::IsTimeForWatering()
         return false;
 
     auto currentMilliseconds = millis();
-    auto waitTimeInMilliseconds = Converters::MinutesToMilliseconds(WaitTimeInMinutes);
+    auto waitTimeInMilliseconds = MyDateTimeConverters::MinutesToMilliseconds(WaitTimeInMinutes);
     auto passedTimeinMilliseconds = currentMilliseconds - _stopTimeInMilliseconds;
 
     return passedTimeinMilliseconds >= waitTimeInMilliseconds;
@@ -70,24 +70,24 @@ bool Pump::IsTimeToStopWatering()
 String Pump::ConvertMillisecondsToStringTimeFormat(unsigned long milliseconds)
 {
     String stringBuilder;
-    auto totalSeconds = Converters::MillisecondsToSeconds(milliseconds);
+    auto totalSeconds = MyDateTimeConverters::MillisecondsToSeconds(milliseconds);
 
-    auto days = Converters::SecondsToDays(totalSeconds);
+    auto days = MyDateTimeConverters::SecondsToDays(totalSeconds);
     if (days != 0)
     {
         stringBuilder.concat(String(days) + "d ");
-        totalSeconds -= Converters::DaysToSeconds(days);
+        totalSeconds -= MyDateTimeConverters::DaysToSeconds(days);
     }
-    auto hours = Converters::SecondsToHours(totalSeconds);
+    auto hours = MyDateTimeConverters::SecondsToHours(totalSeconds);
     if (hours <= 9)
         stringBuilder.concat("0");
     stringBuilder.concat(String(hours) + ":");
-    totalSeconds -= Converters::HoursToSeconds(hours);
-    auto minutes = Converters::SecondsToMinutes(totalSeconds);
+    totalSeconds -= MyDateTimeConverters::HoursToSeconds(hours);
+    auto minutes = MyDateTimeConverters::SecondsToMinutes(totalSeconds);
     if (minutes <= 9)
         stringBuilder.concat("0");
     stringBuilder.concat(String(minutes) + ":");
-    totalSeconds -= Converters::HoursToMinutes(minutes);
+    totalSeconds -= MyDateTimeConverters::HoursToMinutes(minutes);
     auto seconds = totalSeconds;
     if (seconds <= 9)
         stringBuilder.concat("0");
@@ -98,18 +98,18 @@ String Pump::ConvertMillisecondsToStringTimeFormat(unsigned long milliseconds)
 
 String Pump::ConvertMillisecondsToSecondsString(unsigned long milliseconds)
 {
-    auto seconds = Converters::MillisecondsToSeconds(milliseconds);
+    auto seconds = MyDateTimeConverters::MillisecondsToSeconds(milliseconds);
     return String(seconds) + " sec";
 }
 unsigned long Pump::GetPeriodTimeInMilliseconds()
 {
     unsigned long periodTimeInMilliseconds = 0;
     if (_pumpMode == ForcedlyStartedWithTimer)
-        periodTimeInMilliseconds = Converters::SecondsToMilliseconds(_forcedlyStartedTimerInSeconds);
+        periodTimeInMilliseconds = MyDateTimeConverters::SecondsToMilliseconds(_forcedlyStartedTimerInSeconds);
     else if (_isWorking)
-        periodTimeInMilliseconds = Converters::SecondsToMilliseconds(WorkTimeInSeconds);
+        periodTimeInMilliseconds = MyDateTimeConverters::SecondsToMilliseconds(WorkTimeInSeconds);
     else
-        periodTimeInMilliseconds = Converters::MinutesToMilliseconds(WaitTimeInMinutes);
+        periodTimeInMilliseconds = MyDateTimeConverters::MinutesToMilliseconds(WaitTimeInMinutes);
 
     return periodTimeInMilliseconds;
 }

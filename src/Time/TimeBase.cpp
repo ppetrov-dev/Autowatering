@@ -18,22 +18,22 @@ void TimeBase::ConstrainMinutes(){
 }
 
 unsigned long TimeBase::ToSeconds(){
-    auto hoursInSeconds = Converters::HoursToSeconds(_hours);
-    auto minutesInSeconds = Converters::MinutesToSeconds(_minutes);
+    auto hoursInSeconds = MyDateTimeConverters::HoursToSeconds(_hours);
+    auto minutesInSeconds = MyDateTimeConverters::MinutesToSeconds(_minutes);
     return hoursInSeconds + minutesInSeconds;
 }
 
 void TimeBase::UpdateValuesFromSeconds(unsigned long seconds){
-    auto hours = Converters::SecondsToHours(seconds);
-    auto secondsWithoutDaysAndHours= seconds - Converters::HoursToSeconds(hours);
-    auto minutes = Converters::SecondsToMinutes(secondsWithoutDaysAndHours);
+    auto hours = MyDateTimeConverters::SecondsToHours(seconds);
+    auto secondsWithoutDaysAndHours= seconds - MyDateTimeConverters::HoursToSeconds(hours);
+    auto minutes = MyDateTimeConverters::SecondsToMinutes(secondsWithoutDaysAndHours);
 
     _hours = hours;
     _minutes = minutes;
 }
 
 void TimeBase::ChangeHours(int increment){
-    _hours+= increment;
+    _hours += increment;
     ConstrainHours();
 }
 void TimeBase::ChangeMinutes(int increment){
