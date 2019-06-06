@@ -6,7 +6,7 @@
 #include "Pump/Pump.h"
 #include "settings.h"
 #include "enums.h"
-#include "converters.h"
+#include "MyDateTimeConverters.h"
 #include "DataStorage/DataStorage.h"
 
 AutoWateringStateMachine _autoWateringStateMachine;
@@ -44,7 +44,7 @@ void UpdateSelectedValuesFromSelectedPump()
 {
   auto pump = GetSelectedPump();
   auto waitTimeInMinutes = pump->WaitTimeInMinutes;
-  auto waitTimeInSeconds = Converters::MinutesToSeconds(waitTimeInMinutes);
+  auto waitTimeInSeconds = MyDateTimeConverters::MinutesToSeconds(waitTimeInMinutes);
   auto workTimeInSeconds = pump->WorkTimeInSeconds;
 
   _autoWateringLcd.UpdateWaitTimeFromSeconds(waitTimeInSeconds);
@@ -58,7 +58,7 @@ void UpdateSelectedPumpWaitAndWorkTime()
   auto waitTimeInSeconds = _autoWateringLcd.ConvertWaitTimeToSeconds();
 
   pump->WorkTimeInSeconds = workTimeInSeconds;
-  pump->WaitTimeInMinutes = Converters::SecondsToMinutes(waitTimeInSeconds);
+  pump->WaitTimeInMinutes = MyDateTimeConverters::SecondsToMinutes(waitTimeInSeconds);
 }
 
 void TryPrintSelectedPumpStatus()
@@ -90,7 +90,7 @@ void OnStateChanged()
 }
 void OnStateMachineLeftSettings()
 {
-  auto waitTimeInMinutes = Converters::SecondsToMinutes(_autoWateringLcd.ConvertWaitTimeToSeconds());
+  auto waitTimeInMinutes = MyDateTimeConverters::SecondsToMinutes(_autoWateringLcd.ConvertWaitTimeToSeconds());
   auto workTimeInSeconds = _autoWateringLcd.ConvertWorkTimeToSeconds();
   UpdateSelectedValuesToSelectedPump(waitTimeInMinutes, workTimeInSeconds);
   SaveDataIfNeeded(_autoWateringLcd.GetSelectedPumpIndex(), waitTimeInMinutes, workTimeInSeconds);

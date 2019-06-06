@@ -15,14 +15,14 @@ void WaitTime::ConstrainDays()
 
 unsigned long WaitTime::ToSeconds()
 {
-    return TimeBase::ToSeconds() + Converters::DaysToSeconds(_days);
+    return TimeBase::ToSeconds() + MyDateTimeConverters::DaysToSeconds(_days);
 }
 
 void WaitTime::UpdateValuesFromSeconds(unsigned long seconds)
 {
 
-    auto days = Converters::SecondsToDays(seconds);
-    auto secondsWithoutDays = seconds - Converters::DaysToSeconds(days);
+    auto days = MyDateTimeConverters::SecondsToDays(seconds);
+    auto secondsWithoutDays = seconds - MyDateTimeConverters::DaysToSeconds(days);
     _days = days;
 
     TimeBase::UpdateValuesFromSeconds(secondsWithoutDays);
