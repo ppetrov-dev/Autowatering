@@ -1,31 +1,30 @@
 #include "OneButton.h"
-#include "MyEncoder/MyEncoder.h"
+#include "MyRotaryEncoder.h"
+#include "MyTimer.h"
 #include "AutoWateringLcd/AutoWateringLcd.h"
 #include "AutoWateringStateMachine/AutoWateringStateMachine.h"
 #include "Pump/Pump.h"
 #include "settings.h"
 #include "enums.h"
-#include "converters.h"
-#include "Timer/Timer.h"
+#include "MyDateTimeConverters.h"
 #include "DataStorage/DataStorage.h"
 
-AutoWateringStateMachine _autoWateringAutoWateringStateMachine;
-MyEncoder _autoWateringEncoder = MyEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
+AutoWateringStateMachine _autoWateringStateMachine;
+MyRotaryEncoder _autoWateringEncoder = MyRotaryEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
 
-OneButton _pumpButton1 = OneButton(PIN_Button1, true, true);
-Pump _pump1 = Pump(PIN_Pump1);
-OneButton _pumpButton2 = OneButton(PIN_Button2, true, true);
-Pump _pump2 = Pump(PIN_Pump2);
 AutoWateringLcd _autoWateringLcd = AutoWateringLcd(16, 2);
-Timer _timer;
+MyTimer _timer;
 
 DataStorage _dataStorage(PUPM_AMOUNT);
-Pump *_pumps[PUPM_AMOUNT]={ &_pump1, &_pump2};
-OneButton* _buttons[PUPM_AMOUNT]={&_pumpButton1, &_pumpButton2};
+Pump *_pumps[PUPM_AMOUNT];
+
+OneButton _pumpButton1 = OneButton(PIN_Button1, true, true);
+OneButton _pumpButton2 = OneButton(PIN_Button2, true, true);
+OneButton *_buttons[PUPM_AMOUNT] = {&_pumpButton1, &_pumpButton2};
 
 bool _isWatering;
 
-Pump* GetSelectedPump()
+Pump *GetSelectedPump()
 {
   auto pumpIndex = _autoWateringLcd.GetSelectedPumpIndex();
   auto pump = _pumps[pumpIndex];
@@ -45,7 +44,7 @@ void UpdateSelectedValuesFromSelectedPump()
 {
   auto pump = GetSelectedPump();
   auto waitTimeInMinutes = pump->WaitTimeInMinutes;
-  auto waitTimeInSeconds = Converters::MinutesToSeconds(waitTimeInMinutes);
+  auto waitTimeInSeconds = MyDateTimeConverters::MinutesToSeconds(waitTimeInMinutes);
   auto workTimeInSeconds = pump->WorkTimeInSeconds;
 
   _autoWateringLcd.UpdateWaitTimeFromSeconds(waitTimeInSeconds);
@@ -59,7 +58,7 @@ void UpdateSelectedPumpWaitAndWorkTime()
   auto waitTimeInSeconds = _autoWateringLcd.ConvertWaitTimeToSeconds();
 
   pump->WorkTimeInSeconds = workTimeInSeconds;
-  pump->WaitTimeInMinutes = Converters::SecondsToMinutes(waitTimeInSeconds);
+  pump->WaitTimeInMinutes = MyDateTimeConverters::SecondsToMinutes(waitTimeInSeconds);
 }
 
 void TryPrintSelectedPumpStatus()
@@ -76,16 +75,9 @@ void TryPrintSelectedPumpStatus()
   }
 }
 
-Data CreateData(unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds)
-{
-  Data data;
-  data.WaitTimeInMinutes = waitTimeInMinutes;
-  data.WorkTimeInSeconds = workTimeInSeconds;
-  return data;
-}
 void SaveDataIfNeeded(int index, unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds)
 {
-  auto data = CreateData(waitTimeInMinutes, workTimeInSeconds);
+  Data data(waitTimeInMinutes, workTimeInSeconds);
   _dataStorage.SaveDataIfNeeded(index, data);
 }
 
@@ -98,7 +90,7 @@ void OnStateChanged()
 }
 void OnStateMachineLeftSettings()
 {
-  auto waitTimeInMinutes = Converters::SecondsToMinutes(_autoWateringLcd.ConvertWaitTimeToSeconds());
+  auto waitTimeInMinutes = MyDateTimeConverters::SecondsToMinutes(_autoWateringLcd.ConvertWaitTimeToSeconds());
   auto workTimeInSeconds = _autoWateringLcd.ConvertWorkTimeToSeconds();
   UpdateSelectedValuesToSelectedPump(waitTimeInMinutes, workTimeInSeconds);
   SaveDataIfNeeded(_autoWateringLcd.GetSelectedPumpIndex(), waitTimeInMinutes, workTimeInSeconds);
@@ -106,21 +98,25 @@ void OnStateMachineLeftSettings()
 #pragma endregion
 
 #pragma region Buttons Handlers
-void OnButtonLongPressStart(int index){
-  _pumps[index]->ForceStart(ForcedlyStarted); 
+void OnButtonLongPressStart(int index)
+{
+  _pumps[index]->ForceStart(ForcedlyStarted);
 }
-void OnButtonDoubleClick(int index){
+void OnButtonDoubleClick(int index)
+{
   auto pump = _pumps[index];
-  if(pump->GetIsWorking()){
+  if (pump->GetIsWorking())
+  {
     pump->Stop();
     return;
   }
-  _pumps[index]->ForceStart(ForcedlyStartedWithTimer); 
+  _pumps[index]->ForceStart(ForcedlyStartedWithTimer);
 }
-void OnButtonLongPressStop(int index){
-   _pumps[index]->Stop(); 
+void OnButtonLongPressStop(int index)
+{
+  _pumps[index]->Stop();
 }
- 
+
 #pragma endregion
 void setup()
 {
@@ -136,17 +132,21 @@ void setup()
 
   for (int i = 0; i < PUPM_AMOUNT; i++)
   {
-    auto pump = _pumps[i];
-    pump->Init(FORCEDLY_STARTED_PUMP_SECONDS);
+    auto pump = new Pump(PIN_FirstPump + i);
+    _pumps[i] = pump;
+    pump->Init(FORCEDLY_STARTED_PUMP_SECONDS, RELAY_TYPE);
     auto isDataReady = _dataStorage.GetIsReady(i);
-    if(isDataReady)
-      {
-        auto data = _dataStorage.GetData(i);
-        pump->WaitTimeInMinutes = data->WaitTimeInMinutes; 
-        pump->WorkTimeInSeconds = data->WorkTimeInSeconds; 
-      }
+    if (isDataReady)
+    {
+      auto data = _dataStorage.GetData(i);
+      pump->WaitTimeInMinutes = data->WaitTimeInMinutes;
+      pump->WorkTimeInSeconds = data->WorkTimeInSeconds;
+    }
     else
-      _dataStorage.SaveDataIfNeeded(i, CreateData(pump->WaitTimeInMinutes, pump->WorkTimeInSeconds));
+    {
+      Data data(pump->WaitTimeInMinutes, pump->WorkTimeInSeconds);
+      _dataStorage.SaveDataIfNeeded(i, data);
+    }
   }
 
   _autoWateringStateMachine.AttachOnIncreaseValue([]() { _autoWateringLcd.UpdateSelectedValues(_autoWateringStateMachine.GetState(), 1); });
@@ -158,11 +158,11 @@ void setup()
   pinMode(PIN_Button1, INPUT_PULLUP);
   pinMode(PIN_Button2, INPUT_PULLUP);
   _pumpButton1.attachLongPressStart([]() { OnButtonLongPressStart(0); });
-  _pumpButton1.attachLongPressStop([]() { OnButtonLongPressStop(0);});
-  _pumpButton1.attachDoubleClick([](){ OnButtonDoubleClick(0);});
-  _pumpButton2.attachLongPressStart([]() {OnButtonLongPressStart(1);});
+  _pumpButton1.attachLongPressStop([]() { OnButtonLongPressStop(0); });
+  _pumpButton1.attachDoubleClick([]() { OnButtonDoubleClick(0); });
+  _pumpButton2.attachLongPressStart([]() { OnButtonLongPressStart(1); });
   _pumpButton2.attachLongPressStop([]() { OnButtonLongPressStop(1); });
-  _pumpButton2.attachDoubleClick([](){ OnButtonDoubleClick(1); });
+  _pumpButton2.attachDoubleClick([]() { OnButtonDoubleClick(1); });
 
   _autoWateringEncoder.SetEncoderType(ENCODER_TYPE);
   _autoWateringEncoder.SetEncoderDirection(IS_ENCODER_REVERSED);
@@ -174,14 +174,15 @@ void setup()
   _autoWateringEncoder.AttachOnClick([]() { _autoWateringStateMachine.Run(EncoderClickCommand); });
 
   _timer.SetInterval(1000);
-  _timer.AttachOnTick([]() { TryPrintSelectedPumpStatus(); });
+  _timer.AttachOnTick(&TryPrintSelectedPumpStatus);
   _timer.Start();
 
   _autoWateringLcd.Refresh(_autoWateringStateMachine.GetState());
 }
 
-void HandleButtonsTick(){
-   for (int i = 0; i < PUPM_AMOUNT; i++)
+void HandleButtonsTick()
+{
+  for (int i = 0; i < PUPM_AMOUNT; i++)
   {
     auto button = _buttons[i];
     button->tick();
@@ -199,7 +200,8 @@ void UpdateIsWatering()
   }
 }
 
-void HandlePumpsTick(){
+void HandlePumpsTick()
+{
   for (int i = 0; i < PUPM_AMOUNT; i++)
   {
     auto pump = _pumps[i];
@@ -208,7 +210,7 @@ void HandlePumpsTick(){
 
     pump->Tick();
 
-    if(pump->GetIsWorking() && IS_PARALLEL_WATERING_DISABLED)
+    if (pump->GetIsWorking() && IS_PARALLEL_WATERING_DISABLED)
       break;
   }
 }

@@ -28,7 +28,7 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * Lcd1602 module with I2C
 * Rotary encoder
 * Buttons x2
-* Pumps (5V) x2
+* Pumps (5V) x2 **(than I used 12V pumps + step up converter)**
 * Power supply (5V)
 * Wires to connect, circuit board
 * Box
@@ -47,18 +47,21 @@ Also I added capacitor in the scheme and connected it to arduino outs:
 
 And I have different pins to connect modules you can find them in "settings.h" file:
 ```C++
-#define PIN_EncoderClk 9
-#define PIN_EncoderDt 10
-#define PIN_EncoderSw 11
+#define PIN_EncoderClk 2
+#define PIN_EncoderDt 3
+#define PIN_EncoderSw 4
+
 #define PIN_Button1 5
 #define PIN_Button2 6
-#define PIN_Pump1 7
-#define PIN_Pump2 8
+
+#define PIN_FirstPump 7
+#define PUPM_AMOUNT 2
 ```
+I use 2 pumps (D7 and D8 outs in Arduiono) but you can add more. See code how to implement that. Also you can remove buttons if you don't need them and use their pins to connect extra pumps.  
 <a id="what-next"></a>
 ## What next
 I don't have any certain plans for the project. I'd add a soil moisture sensor or/and real-time clocks module. Most likely it will be connected with the Internet. I'll create an account in Twitter for my plants and they will post how comfortable they live. Will see.
 
-[whatYouNeed]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.0/Screenshots/WhatYouNeed.png
-[howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.0/Screenshots/HowToConnectDiodes.jpg
-[howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.0/Screenshots/HowToConnectCapacitor.png
+[whatYouNeed]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/WhatYouNeed.png
+[howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/HowToConnectDiodes.jpg
+[howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/HowToConnectCapacitor.png

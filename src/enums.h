@@ -28,4 +28,10 @@ enum PumpMode{
   ForcedlyStartedWithTimer
 };
 
+enum RelayType
+{
+  LowLevel = 0, //low signal when start
+  HighLevel = 1 //high signal when start
+};
+
 #endif

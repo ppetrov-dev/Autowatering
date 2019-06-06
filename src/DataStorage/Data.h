@@ -5,8 +5,15 @@
 
 struct Data
 {
-    unsigned long WaitTimeInMinutes = ULONG_MAX;
-    unsigned long WorkTimeInSeconds = ULONG_MAX;
+    unsigned long WaitTimeInMinutes;
+    unsigned long WorkTimeInSeconds;
+
+    Data() : WaitTimeInMinutes{ULONG_MAX}, WorkTimeInSeconds{ULONG_MAX}
+    {
+    }
+    Data(unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds)
+        : WaitTimeInMinutes{waitTimeInMinutes}, WorkTimeInSeconds{workTimeInSeconds}
+    {
+    }
 };
-    
 #endif // !dataH

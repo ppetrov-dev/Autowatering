@@ -376,7 +376,7 @@ void AutoWateringLcd::UpdateWaitTimeFromSeconds(unsigned long seconds)
 
 bool AutoWateringLcd::GetIsLcdTimeoutExpired()
 {
-    auto timeoutInMilliseconds = Converters::SecondsToMilliseconds(TimeoutInSeconds);
+    auto timeoutInMilliseconds = MyDateTimeConverters::SecondsToMilliseconds(TimeoutInSeconds);
     return millis() - _lastActivityTimeInMilliseconds >= timeoutInMilliseconds;
 }
 

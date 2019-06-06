@@ -3,12 +3,13 @@
 
 #include <Arduino.h>
 #include "enums.h"
-#include "converters.h"
+#include "MyDateTimeConverters.h"
 
 class Pump
 {
 private:
     byte _pin;
+    RelayType _relayType;
     bool _isWorking;
     unsigned long _startTimeInMilliseconds = 0;
     unsigned long _stopTimeInMilliseconds = 0;
@@ -28,7 +29,7 @@ public:
     unsigned long WaitTimeInMinutes = 1;
 
     Pump(byte pin);
-    void Init(unsigned long forcedlyStartedTimerInSeconds);
+    void Init(unsigned long forcedlyStartedTimerInSeconds, RelayType relayType);
     bool GetIsWorking();
     
     void ForceStart(PumpMode pumpMode);
