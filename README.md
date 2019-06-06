@@ -7,7 +7,10 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * [The main improvements](#The-main-improvements)
 * [What you need to repeat](#what-you-need-to-repeats)
 * [How to connect](#how-to-connect)
+* [Versions](#versions)
 * [What next](#what-next)
+
+![alt text][device]
 
 <a id="The-main-improvements"></a>
 ## The main improvements 
@@ -58,10 +61,16 @@ And I have different pins to connect modules you can find them in "settings.h" f
 #define PUPM_AMOUNT 2
 ```
 I use 2 pumps (D7 and D8 outs in Arduiono) but you can add more. See code how to implement that. Also you can remove buttons if you don't need them and use their pins to connect extra pumps.  
+
+<a id="versions"></a>
+## Versions
+version 1.0 - current
+
 <a id="what-next"></a>
 ## What next
 I don't have any certain plans for the project. I'd add a soil moisture sensor or/and real-time clocks module. Most likely it will be connected with the Internet. I'll create an account in Twitter for my plants and they will post how comfortable they live. Will see.
 
-[whatYouNeed]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/WhatYouNeed.png
-[howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/HowToConnectDiodes.jpg
-[howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/master/Screenshots/HowToConnectCapacitor.png
+[whatYouNeed]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.0/Screenshots/WhatYouNeed.png
+[howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.0/Screenshots/HowToConnectDiodes.jpg
+[howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.0/Screenshots/HowToConnectCapacitor.png
+[device]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.0/Screenshots/device.png
