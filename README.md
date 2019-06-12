@@ -64,7 +64,8 @@ I use 2 pumps (D7 and D8 outs in Arduiono) but you can add more. See code how to
 
 <a id="versions"></a>
 ## Versions
-version 1.0 - current
+version 1.0 - current<br/>
+[version 1.1](https://github.com/ppetrov-dev/Autowatering/tree/version-1.1) (with RTC module)
 
 <a id="what-next"></a>
 ## What next
