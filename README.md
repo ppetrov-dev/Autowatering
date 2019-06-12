@@ -22,6 +22,7 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * Maximum time for a pump to wait is almost 10 days (-1 minute), to work - almost 1 day (-1 second) 
 * Forse start/stop pumps by buttons commands (double click, hold press/release)
 * Different timers display remaining time to change a pump state, force start timer in seconds 
+* Save epoch timestamp (in seconds) of last pumps watering **(added in version 1.1)**
 
 <a id="what-you-need-to-repeats"></a>
 ## What you need to repeat
@@ -64,8 +65,8 @@ I use 2 pumps (D7 and D8 outs in Arduiono) but you can add more. See code how to
 
 <a id="versions"></a>
 ## Versions
-version 1.0 - current<br/>
-[version 1.1](https://github.com/ppetrov-dev/Autowatering/tree/version-1.1) (with RTC module)
+[version 1.0](https://github.com/ppetrov-dev/Autowatering/tree/version-1.0)<br/>
+version 1.1 - current
 
 <a id="what-next"></a>
 ## What next
