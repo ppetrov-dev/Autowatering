@@ -26,7 +26,8 @@ void Pump::Start()
     auto stateWhenOn = _relayType == HighLevel ? LOW : HIGH;
     _isWorking = true;
     digitalWrite(_pin, stateWhenOn);
-    _startTimeInMilliseconds = millis();
+    _offsetInMilliseconds = 0;
+    _startTimeInMilliseconds = GetCurrentMilliseconds();
 }
 
 void Pump::ForceStart(PumpMode pumpMode)
@@ -36,11 +37,11 @@ void Pump::ForceStart(PumpMode pumpMode)
 }
 void Pump::Stop()
 {
-    auto stateWhenOff = _relayType == HighLevel? HIGH: LOW;
+    auto stateWhenOff = _relayType == HighLevel ? HIGH : LOW;
     digitalWrite(_pin, stateWhenOff);
     _isWorking = false;
 
-    _stopTimeInMilliseconds = millis();
+    _stopTimeInMilliseconds = GetCurrentMilliseconds();
     _pumpMode = Normal;
 }
 bool Pump::IsTimeForWatering()
@@ -48,7 +49,7 @@ bool Pump::IsTimeForWatering()
     if (!IsAutoWateringEnabled() || _isWorking)
         return false;
 
-    auto currentMilliseconds = millis();
+    auto currentMilliseconds = GetCurrentMilliseconds();
     auto waitTimeInMilliseconds = MyDateTimeConverters::MinutesToMilliseconds(WaitTimeInMinutes);
     auto passedTimeinMilliseconds = currentMilliseconds - _stopTimeInMilliseconds;
 
@@ -60,8 +61,8 @@ bool Pump::IsTimeToStopWatering()
     if (!_isWorking)
         return false;
 
-    auto currentMilliseconds = millis();
-    auto periodTimeInMilliseconds =  GetPeriodTimeInMilliseconds();
+    auto currentMilliseconds = GetCurrentMilliseconds();
+    auto periodTimeInMilliseconds = GetPeriodTimeInMilliseconds();
     auto passedTimeinMilliseconds = currentMilliseconds - _startTimeInMilliseconds;
 
     return passedTimeinMilliseconds >= periodTimeInMilliseconds;
@@ -101,6 +102,12 @@ String Pump::ConvertMillisecondsToSecondsString(unsigned long milliseconds)
     auto seconds = MyDateTimeConverters::MillisecondsToSeconds(milliseconds);
     return String(seconds) + " sec";
 }
+
+unsigned long Pump::GetCurrentMilliseconds()
+{
+    return millis() + _offsetInMilliseconds;
+}
+
 unsigned long Pump::GetPeriodTimeInMilliseconds()
 {
     unsigned long periodTimeInMilliseconds = 0;
@@ -115,7 +122,7 @@ unsigned long Pump::GetPeriodTimeInMilliseconds()
 }
 String Pump::GetFormatedStringTime()
 {
-    auto currentMilliseconds = millis();
+    auto currentMilliseconds = GetCurrentMilliseconds();
     auto timeInMilliseconds = _isWorking ? _startTimeInMilliseconds : _stopTimeInMilliseconds;
     if (_pumpMode == ForcedlyStarted)
         return ConvertMillisecondsToSecondsString(currentMilliseconds - timeInMilliseconds);
@@ -148,4 +155,9 @@ void Pump::Tick()
         Stop();
         return;
     }
+}
+void Pump::ResetOffsetTime(long timeOffsetInSeconds)
+{
+    auto offsetInMilliseconds = MyDateTimeConverters::SecondsToMilliseconds(timeOffsetInSeconds);
+    _offsetInMilliseconds = offsetInMilliseconds;
 }

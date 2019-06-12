@@ -7,47 +7,73 @@ DataStorage::DataStorage(int amount)
         _dataArray[i] = new Data();
 }
 
+unsigned int DataStorage::GetDataAddress()
+{
+    return _eepromAddress;
+}
+
+unsigned int DataStorage::GetTimestampAddress()
+{
+    return _eepromAddress + sizeof(Data) * _amount;
+}
+
 void DataStorage::SaveDataIfNeeded(int index, Data data)
 {
-    auto address = _eepromAddress;
-    auto savedData = _dataArray[index];
+    auto address = GetDataAddress() + sizeof(Data) * index;
+    auto savedData = GetData(index);
 
     if (savedData->WaitTimeInMinutes == data.WaitTimeInMinutes && savedData->WorkTimeInSeconds == data.WorkTimeInSeconds)
         return;
 
-    for (int i = 0; i < _amount; i++)
-    {
-        if (index == i)
-        {
-            EEPROM.put(address, data);
-            break;
-        }
-        address += sizeof(Data);
-    }
+    EEPROM.put(address, data);
 
     savedData->WaitTimeInMinutes = data.WaitTimeInMinutes;
     savedData->WorkTimeInSeconds = data.WorkTimeInSeconds;
 }
 
+void DataStorage::SaveTimestampIfNeeded(int index, unsigned long timestamp)
+{
+    auto address = GetTimestampAddress() + sizeof(unsigned long) * index;
+    auto savedTimestamp = GetTimestamp(index);
+
+    if (savedTimestamp == timestamp)
+        return;
+
+    EEPROM.put(address, timestamp);
+
+    _timestampArray[index] = timestamp;
+}
+
 bool DataStorage::GetIsReady(int index)
 {
-    return _dataArray[index]->WaitTimeInMinutes != ULONG_MAX && _dataArray[index]->WorkTimeInSeconds != ULONG_MAX;
+    return _dataArray[index]->WaitTimeInMinutes != ULONG_MAX && _dataArray[index]->WorkTimeInSeconds != ULONG_MAX && _timestampArray[index] != ULONG_MAX;
 }
 
 void DataStorage::Init()
 {
-    auto address = _eepromAddress;
+    auto dataAddress = GetDataAddress();
+    auto timestampAddress = GetTimestampAddress();
     Data *data = NULL;
-    for (int i = 0; i < _amount; i++)
+    long timestamp = ULONG_MAX;
+    for (int i = 0; i < _amount; i++,
+             dataAddress += sizeof(Data),
+             timestampAddress += sizeof(unsigned long))
     {
         data = new Data();
-        EEPROM.get(address, *data);
+        EEPROM.get(dataAddress, *data);
         _dataArray[i] = data;
-        address += sizeof(Data);
+
+        EEPROM.get(timestampAddress, timestamp);
+        _timestampArray[i] = timestamp;
     }
 }
 
 Data *DataStorage::GetData(int index)
 {
     return _dataArray[index];
+}
+
+unsigned long DataStorage::GetTimestamp(int index)
+{
+    return _timestampArray[index];
 }
