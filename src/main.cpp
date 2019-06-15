@@ -8,12 +8,14 @@
 #include "enums.h"
 #include "MyDateTimeConverters.h"
 #include "DataStorage/DataStorage.h"
+#include "RTC/RealTimeClock.h"
 
 AutoWateringStateMachine _autoWateringStateMachine;
 MyRotaryEncoder _autoWateringEncoder = MyRotaryEncoder(PIN_EncoderClk, PIN_EncoderDt, PIN_EncoderSw);
 
 AutoWateringLcd _autoWateringLcd = AutoWateringLcd(16, 2);
 MyTimer _timer;
+RealTimeClock _realTimeClock;
 
 DataStorage _dataStorage(PUPM_AMOUNT);
 Pump *_pumps[PUPM_AMOUNT];
@@ -63,8 +65,7 @@ void UpdateSelectedPumpWaitAndWorkTime()
 
 void TryPrintSelectedPumpStatus()
 {
-  auto currentState = _autoWateringStateMachine.GetState();
-  switch (currentState)
+  switch (_autoWateringStateMachine.GetState())
   {
   case SelectPumpState:
   case SelectSettingsState:
@@ -74,13 +75,18 @@ void TryPrintSelectedPumpStatus()
     break;
   }
 }
+#pragma region Pump Handlers
+void OnPumpStopped(Pump* pump){
+  int pumpIndex = 0;
+  while (_pumps[pumpIndex]!= pump && pumpIndex  <= PUPM_AMOUNT)
+    pumpIndex++;
+  if(pumpIndex == PUPM_AMOUNT)
+    return;
 
-void SaveDataIfNeeded(int index, unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds)
-{
-  Data data(waitTimeInMinutes, workTimeInSeconds);
-  _dataStorage.SaveDataIfNeeded(index, data);
+  Serial.println("OnPumpStopped| pumpIndex: " + String(pumpIndex));
+  _dataStorage.SaveDataIfNeeded(pumpIndex, _realTimeClock.GetNowTimeStamp());
 }
-
+#pragma endregion
 #pragma region AutoWateringStateMachine Handlers
 void OnStateChanged()
 {
@@ -90,10 +96,11 @@ void OnStateChanged()
 }
 void OnStateMachineLeftSettings()
 {
-  auto waitTimeInMinutes = MyDateTimeConverters::SecondsToMinutes(_autoWateringLcd.ConvertWaitTimeToSeconds());
+  auto waitTimeInSeconds = _autoWateringLcd.ConvertWaitTimeToSeconds();
+  auto waitTimeInMinutes = MyDateTimeConverters::SecondsToMinutes(waitTimeInSeconds);
   auto workTimeInSeconds = _autoWateringLcd.ConvertWorkTimeToSeconds();
   UpdateSelectedValuesToSelectedPump(waitTimeInMinutes, workTimeInSeconds);
-  SaveDataIfNeeded(_autoWateringLcd.GetSelectedPumpIndex(), waitTimeInMinutes, workTimeInSeconds);
+  _dataStorage.SaveDataIfNeeded(_autoWateringLcd.GetSelectedPumpIndex(), waitTimeInMinutes, workTimeInSeconds);
 }
 #pragma endregion
 
@@ -121,32 +128,43 @@ void OnButtonLongPressStop(int index)
 void setup()
 {
   if (DEBUG)
+  {
     Serial.begin(9600);
+    Serial.println("Serial OK");
+  }
+  Wire.begin();
+  _realTimeClock.Begin();
+  Serial.print("Current DateTime: ");
+  Serial.println(_realTimeClock.GetStringNow());
 
   _autoWateringLcd.IsAutoOff = IS_LCD_AUTO_OFF;
   _autoWateringLcd.TimeoutInSeconds = Lcd_TIMEOUT_SECONDS;
   _autoWateringLcd.Init(PUPM_AMOUNT);
   _autoWateringLcd.AttachOnSelectedPumpChanged([]() { TryPrintSelectedPumpStatus(); });
+  _autoWateringLcd.Refresh(_autoWateringStateMachine.GetState());
 
   _dataStorage.Init();
-
+  auto nowTimeStampInSeconds = _realTimeClock.GetNowTimeStamp();
   for (int i = 0; i < PUPM_AMOUNT; i++)
   {
     auto pump = new Pump(PIN_FirstPump + i);
     _pumps[i] = pump;
     pump->Init(FORCEDLY_STARTED_PUMP_SECONDS, RELAY_TYPE);
-    auto isDataReady = _dataStorage.GetIsReady(i);
-    if (isDataReady)
+    auto isDataStorageReady = _dataStorage.GetIsReady(i);
+    if (isDataStorageReady)
     {
       auto data = _dataStorage.GetData(i);
       pump->WaitTimeInMinutes = data->WaitTimeInMinutes;
       pump->WorkTimeInSeconds = data->WorkTimeInSeconds;
+      auto timeStampInSeconds = data->LastWateringTimeStampInSeconds;
+
+      auto timeOffsetInSeconds = nowTimeStampInSeconds - timeStampInSeconds;
+      if (timeOffsetInSeconds >= ACCEPTABLE_TIME_OFFSET_SECONDS)
+        pump->ResetOffsetTime(timeOffsetInSeconds);
     }
     else
-    {
-      Data data(pump->WaitTimeInMinutes, pump->WorkTimeInSeconds);
-      _dataStorage.SaveDataIfNeeded(i, data);
-    }
+      _dataStorage.SaveDataIfNeeded(i, pump->WaitTimeInMinutes, pump->WorkTimeInSeconds, nowTimeStampInSeconds);
+      pump->AttachOnStopped(&OnPumpStopped);
   }
 
   _autoWateringStateMachine.AttachOnIncreaseValue([]() { _autoWateringLcd.UpdateSelectedValues(_autoWateringStateMachine.GetState(), 1); });
@@ -176,8 +194,6 @@ void setup()
   _timer.SetInterval(1000);
   _timer.AttachOnTick(&TryPrintSelectedPumpStatus);
   _timer.Start();
-
-  _autoWateringLcd.Refresh(_autoWateringStateMachine.GetState());
 }
 
 void HandleButtonsTick()
@@ -205,7 +221,8 @@ void HandlePumpsTick()
   for (int i = 0; i < PUPM_AMOUNT; i++)
   {
     auto pump = _pumps[i];
-    if (_isWatering && IS_PARALLEL_WATERING_DISABLED && !pump->GetIsWorking())
+    auto beforeIsPumpWatering = pump->GetIsWorking();
+    if (_isWatering && IS_PARALLEL_WATERING_DISABLED && !beforeIsPumpWatering)
       continue;
 
     pump->Tick();
