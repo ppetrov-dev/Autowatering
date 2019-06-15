@@ -11,6 +11,7 @@ private:
     byte _pin;
     RelayType _relayType;
     bool _isWorking;
+    void (*_onStoppedCallback)(Pump*) = NULL;
     unsigned long _startTimeInMilliseconds = 0;
     unsigned long _stopTimeInMilliseconds = 0;
     unsigned long _offsetInMilliseconds = 0;
@@ -34,7 +35,7 @@ public:
     void Init(unsigned long forcedlyStartedTimerInSeconds, RelayType relayType);
     bool GetIsWorking();
     void ResetOffsetTime(long timeOffsetInSeconds);
-
+    void AttachOnStopped(void onFinishWateringCallback(Pump*));
     void ForceStart(PumpMode pumpMode);
     void Stop();
 

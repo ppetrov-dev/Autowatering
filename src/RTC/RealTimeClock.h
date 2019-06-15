@@ -13,7 +13,7 @@ public:
     String GetStringNow();
     void Begin();
     DateTime GetNow();
-    long GetNowTimestamp();
+    long GetNowTimeStamp();
 
     static String GetStringDateTime(DateTime dateTime);
 };

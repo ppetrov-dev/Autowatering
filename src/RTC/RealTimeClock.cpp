@@ -31,7 +31,7 @@ String RealTimeClock::GetStringDateTime(DateTime dateTime)
     return stringBuilder;
 }
 
-long RealTimeClock::GetNowTimestamp()
+long RealTimeClock::GetNowTimeStamp()
 {
     auto now = GetNow();
     return now.getEpoch();

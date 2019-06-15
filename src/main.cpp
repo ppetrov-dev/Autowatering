@@ -75,27 +75,18 @@ void TryPrintSelectedPumpStatus()
     break;
   }
 }
+#pragma region Pump Handlers
+void OnPumpStopped(Pump* pump){
+  int pumpIndex = 0;
+  while (_pumps[pumpIndex]!= pump && pumpIndex  <= PUPM_AMOUNT)
+    pumpIndex++;
+  if(pumpIndex == PUPM_AMOUNT)
+    return;
 
-void SaveDataIfNeeded(int index, unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds)
-{
-  Serial.println("SaveDataIfNeeded| index: " + String(index) + " waitTimeInMinutes: " + String(waitTimeInMinutes) + " workTimeInSeconds: " + String(workTimeInSeconds));
-  Data data(waitTimeInMinutes, workTimeInSeconds);
-  _dataStorage.SaveDataIfNeeded(index, data);
+  Serial.println("OnPumpStopped| pumpIndex: " + String(pumpIndex));
+  _dataStorage.SaveDataIfNeeded(pumpIndex, _realTimeClock.GetNowTimeStamp());
 }
-
-void SaveTimestampIfNeeded(int index, unsigned long timestamp)
-{
-  auto datetime = DateTime(timestamp);
-  Serial.println("SaveTimestampIfNeeded| index: " + String(index) + " timestamp: " + String(timestamp));
-  _dataStorage.SaveTimestampIfNeeded(index, timestamp);
-}
-
-void SaveNowTimestampIfNeeded(int index)
-{
-  auto nowTimestamp = _realTimeClock.GetNowTimestamp();
-  SaveTimestampIfNeeded(index, nowTimestamp);
-}
-
+#pragma endregion
 #pragma region AutoWateringStateMachine Handlers
 void OnStateChanged()
 {
@@ -109,7 +100,7 @@ void OnStateMachineLeftSettings()
   auto waitTimeInMinutes = MyDateTimeConverters::SecondsToMinutes(waitTimeInSeconds);
   auto workTimeInSeconds = _autoWateringLcd.ConvertWorkTimeToSeconds();
   UpdateSelectedValuesToSelectedPump(waitTimeInMinutes, workTimeInSeconds);
-  SaveDataIfNeeded(_autoWateringLcd.GetSelectedPumpIndex(), waitTimeInMinutes, workTimeInSeconds);
+  _dataStorage.SaveDataIfNeeded(_autoWateringLcd.GetSelectedPumpIndex(), waitTimeInMinutes, workTimeInSeconds);
 }
 #pragma endregion
 
@@ -117,7 +108,6 @@ void OnStateMachineLeftSettings()
 void OnButtonLongPressStart(int index)
 {
   _pumps[index]->ForceStart(ForcedlyStarted);
-  SaveNowTimestampIfNeeded(index);
 }
 void OnButtonDoubleClick(int index)
 {
@@ -128,7 +118,6 @@ void OnButtonDoubleClick(int index)
     return;
   }
   _pumps[index]->ForceStart(ForcedlyStartedWithTimer);
-  SaveNowTimestampIfNeeded(index);
 }
 void OnButtonLongPressStop(int index)
 {
@@ -155,7 +144,7 @@ void setup()
   _autoWateringLcd.Refresh(_autoWateringStateMachine.GetState());
 
   _dataStorage.Init();
-  auto nowTimestampInSeconds = _realTimeClock.GetNowTimestamp();
+  auto nowTimeStampInSeconds = _realTimeClock.GetNowTimeStamp();
   for (int i = 0; i < PUPM_AMOUNT; i++)
   {
     auto pump = new Pump(PIN_FirstPump + i);
@@ -167,17 +156,15 @@ void setup()
       auto data = _dataStorage.GetData(i);
       pump->WaitTimeInMinutes = data->WaitTimeInMinutes;
       pump->WorkTimeInSeconds = data->WorkTimeInSeconds;
+      auto timeStampInSeconds = data->LastWateringTimeStampInSeconds;
 
-      auto timestampInSeconds = _dataStorage.GetTimestamp(i);
-      auto timeOffsetInSeconds = nowTimestampInSeconds - timestampInSeconds;
+      auto timeOffsetInSeconds = nowTimeStampInSeconds - timeStampInSeconds;
       if (timeOffsetInSeconds >= ACCEPTABLE_TIME_OFFSET_SECONDS)
         pump->ResetOffsetTime(timeOffsetInSeconds);
     }
     else
-    {
-      SaveDataIfNeeded(i, pump->WaitTimeInMinutes, pump->WorkTimeInSeconds);
-      SaveTimestampIfNeeded(i, nowTimestampInSeconds);
-    }
+      _dataStorage.SaveDataIfNeeded(i, pump->WaitTimeInMinutes, pump->WorkTimeInSeconds, nowTimeStampInSeconds);
+      pump->AttachOnStopped(&OnPumpStopped);
   }
 
   _autoWateringStateMachine.AttachOnIncreaseValue([]() { _autoWateringLcd.UpdateSelectedValues(_autoWateringStateMachine.GetState(), 1); });
@@ -240,12 +227,7 @@ void HandlePumpsTick()
 
     pump->Tick();
 
-    auto afterIsPumpWatering = pump->GetIsWorking();
-
-    if (afterIsPumpWatering && beforeIsPumpWatering != afterIsPumpWatering)
-      SaveNowTimestampIfNeeded(i);
-
-    if (afterIsPumpWatering && IS_PARALLEL_WATERING_DISABLED)
+    if (pump->GetIsWorking() && IS_PARALLEL_WATERING_DISABLED)
       break;
   }
 }

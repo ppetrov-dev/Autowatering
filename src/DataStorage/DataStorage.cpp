@@ -12,9 +12,35 @@ unsigned int DataStorage::GetDataAddress()
     return _eepromAddress;
 }
 
-unsigned int DataStorage::GetTimestampAddress()
+bool DataStorage::EqualsData(Data* savedData, Data* data){
+    return savedData->WaitTimeInMinutes == data->WaitTimeInMinutes && savedData->WorkTimeInSeconds == data->WorkTimeInSeconds
+    && savedData->LastWateringTimeStampInSeconds == data->LastWateringTimeStampInSeconds;
+} 
+
+bool DataStorage::GetIsReady(int index)
 {
-    return _eepromAddress + sizeof(Data) * _amount;
+    auto data = _dataArray[index];
+    return data->WaitTimeInMinutes != ULONG_MAX && data->WorkTimeInSeconds != ULONG_MAX && data->LastWateringTimeStampInSeconds != ULONG_MAX;
+}
+
+void DataStorage::Init()
+{
+    auto dataAddress = GetDataAddress();
+    Data *data = NULL;
+    for (int i = 0; i < _amount; i++,
+             dataAddress += sizeof(Data))
+    {
+        data = new Data();
+        EEPROM.get(dataAddress, *data);
+        _dataArray[i] = data;
+    }
+}
+
+Data *DataStorage::GetData(int index)
+{
+    auto data = _dataArray[index];
+    Serial.println("DataStorage|GetData| index: " + String(index) + " waitTimeInMinutes: " + String(data->WaitTimeInMinutes) + " workTimeInSeconds: " + String(data->WorkTimeInSeconds)+ " timeStampInSeconds: " + String(data->LastWateringTimeStampInSeconds));
+    return data;
 }
 
 void DataStorage::SaveDataIfNeeded(int index, Data data)
@@ -22,58 +48,31 @@ void DataStorage::SaveDataIfNeeded(int index, Data data)
     auto address = GetDataAddress() + sizeof(Data) * index;
     auto savedData = GetData(index);
 
-    if (savedData->WaitTimeInMinutes == data.WaitTimeInMinutes && savedData->WorkTimeInSeconds == data.WorkTimeInSeconds)
+    if(EqualsData(savedData, &data))
         return;
 
     EEPROM.put(address, data);
 
     savedData->WaitTimeInMinutes = data.WaitTimeInMinutes;
     savedData->WorkTimeInSeconds = data.WorkTimeInSeconds;
+    savedData->LastWateringTimeStampInSeconds = data.LastWateringTimeStampInSeconds;
+ 
+    Serial.println("DataStorage|SaveDataIfNeeded| index: " + String(index) + " waitTimeInMinutes: " + String(savedData->WaitTimeInMinutes) + " workTimeInSeconds: " + String(savedData->WorkTimeInSeconds)+ " timeStampInSeconds: " + String(savedData->LastWateringTimeStampInSeconds));
 }
 
-void DataStorage::SaveTimestampIfNeeded(int index, unsigned long timestamp)
-{
-    auto address = GetTimestampAddress() + sizeof(unsigned long) * index;
-    auto savedTimestamp = GetTimestamp(index);
-
-    if (savedTimestamp == timestamp)
-        return;
-
-    EEPROM.put(address, timestamp);
-
-    _timestampArray[index] = timestamp;
+void DataStorage::SaveDataIfNeeded(int index, unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds, unsigned long timeStampInSeconds){
+    Data data(waitTimeInMinutes, workTimeInSeconds, timeStampInSeconds);
+    SaveDataIfNeeded(index, data);
 }
 
-bool DataStorage::GetIsReady(int index)
+void DataStorage::SaveDataIfNeeded(int index, unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds)
 {
-    return _dataArray[index]->WaitTimeInMinutes != ULONG_MAX && _dataArray[index]->WorkTimeInSeconds != ULONG_MAX && _timestampArray[index] != ULONG_MAX;
+  auto savedData = GetData(index);
+  SaveDataIfNeeded(index, waitTimeInMinutes, workTimeInSeconds,savedData->LastWateringTimeStampInSeconds);
 }
 
-void DataStorage::Init()
+void DataStorage::SaveDataIfNeeded(int index, unsigned long timeStampInSeconds)
 {
-    auto dataAddress = GetDataAddress();
-    auto timestampAddress = GetTimestampAddress();
-    Data *data = NULL;
-    long timestamp = ULONG_MAX;
-    for (int i = 0; i < _amount; i++,
-             dataAddress += sizeof(Data),
-             timestampAddress += sizeof(unsigned long))
-    {
-        data = new Data();
-        EEPROM.get(dataAddress, *data);
-        _dataArray[i] = data;
-
-        EEPROM.get(timestampAddress, timestamp);
-        _timestampArray[i] = timestamp;
-    }
-}
-
-Data *DataStorage::GetData(int index)
-{
-    return _dataArray[index];
-}
-
-unsigned long DataStorage::GetTimestamp(int index)
-{
-    return _timestampArray[index];
+  auto savedData = GetData(index);
+  SaveDataIfNeeded(index, savedData->WaitTimeInMinutes, savedData->WorkTimeInSeconds, timeStampInSeconds);
 }

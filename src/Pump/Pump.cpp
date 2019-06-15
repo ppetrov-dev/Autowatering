@@ -43,6 +43,10 @@ void Pump::Stop()
 
     _stopTimeInMilliseconds = GetCurrentMilliseconds();
     _pumpMode = Normal;
+
+     if(_onStoppedCallback!=NULL)
+         _onStoppedCallback(this);
+
 }
 bool Pump::IsTimeForWatering()
 {
@@ -160,4 +164,8 @@ void Pump::ResetOffsetTime(long timeOffsetInSeconds)
 {
     auto offsetInMilliseconds = MyDateTimeConverters::SecondsToMilliseconds(timeOffsetInSeconds);
     _offsetInMilliseconds = offsetInMilliseconds;
+}
+
+void Pump::AttachOnStopped(void (*onStoppedCallback)(Pump*)){
+    _onStoppedCallback = onStoppedCallback;
 }

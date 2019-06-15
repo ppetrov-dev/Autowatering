@@ -7,12 +7,13 @@ struct Data
 {
     unsigned long WaitTimeInMinutes;
     unsigned long WorkTimeInSeconds;
+    unsigned long LastWateringTimeStampInSeconds;
 
-    Data() : WaitTimeInMinutes{ULONG_MAX}, WorkTimeInSeconds{ULONG_MAX}
+    Data() : Data(ULONG_MAX, ULONG_MAX, ULONG_MAX)
     {
     }
-    Data(unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds)
-        : WaitTimeInMinutes{waitTimeInMinutes}, WorkTimeInSeconds{workTimeInSeconds}
+    Data(unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds, unsigned long lastWateringTimeStampInSeconds)
+        : WaitTimeInMinutes{waitTimeInMinutes}, WorkTimeInSeconds{workTimeInSeconds},  LastWateringTimeStampInSeconds{lastWateringTimeStampInSeconds}
     {
     }
 };

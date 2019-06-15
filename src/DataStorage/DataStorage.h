@@ -13,18 +13,19 @@ private:
     unsigned int _eepromAddress = 130;
     int _amount;
     Data *_dataArray[PUPM_AMOUNT];
-    unsigned long _timestampArray[PUPM_AMOUNT];
     unsigned int GetDataAddress();
-    unsigned int GetTimestampAddress();
+    bool EqualsData(Data* savedData, Data* data);
 
+    void SaveDataIfNeeded(int intex, Data data);
 public:
     DataStorage(int amount);
     bool GetIsReady(int index);
-    void SaveDataIfNeeded(int index, Data data);
-    void SaveTimestampIfNeeded(int index, unsigned long timestamp);
     void Init();
     Data* GetData(int index);
-    unsigned long GetTimestamp(int index);
+
+    void SaveDataIfNeeded(int index, unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds, unsigned long timeStampInSeconds);
+    void SaveDataIfNeeded(int index, unsigned long waitTimeInMinutes, unsigned long workTimeInSeconds);
+    void SaveDataIfNeeded(int index, unsigned long timeStampInSeconds);
 };
 
 #endif
