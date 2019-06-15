@@ -40,6 +40,7 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * Сapacitor 470uf or more (optional)
 * Check valves x2 (optional)
 * Water hose (optional)
+* DS3231 **(added in version 1.1)**
 
 <a id="how-to-connect"></a>
 ## How to connect
