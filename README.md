@@ -53,6 +53,7 @@ Also I added capacitor in the scheme and connected it to arduino outs:
 And I have different pins to connect modules you can find them in "settings.h" file:
 ```C++
 #define I2C_LcdAddress 0x27
+// #define DS3231_ADDRESS	      0x68 //I2C Slave address - from Sodaq_DS3231.cpp
 
 #define PIN_EncoderClk 2
 #define PIN_EncoderDt 3
@@ -64,7 +65,7 @@ And I have different pins to connect modules you can find them in "settings.h" f
 #define PIN_FirstPump 7
 #define PUMP_AMOUNT 2
 ```
-I use 2 pumps (D7 and D8 outs in Arduiono) but you can add more. See code how to implement that. Also you can remove buttons if you don't need them and use their pins to connect extra pumps.  
+I use 2 pumps (D7 and D8 outs in Arduino) but you can add more. See code how to implement that. Also you can remove buttons if you don't need them and use their pins to connect extra pumps.  
 
 <a id="versions"></a>
 ## Versions
