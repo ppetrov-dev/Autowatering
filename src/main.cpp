@@ -17,12 +17,12 @@ AutoWateringLcd _autoWateringLcd = AutoWateringLcd(16, 2);
 MyTimer _timer;
 RealTimeClock _realTimeClock;
 
-DataStorage _dataStorage(PUPM_AMOUNT);
-Pump *_pumps[PUPM_AMOUNT];
+DataStorage _dataStorage(PUMP_AMOUNT);
+Pump *_pumps[PUMP_AMOUNT];
 
 OneButton _pumpButton1 = OneButton(PIN_Button1, true, true);
 OneButton _pumpButton2 = OneButton(PIN_Button2, true, true);
-OneButton *_buttons[PUPM_AMOUNT] = {&_pumpButton1, &_pumpButton2};
+OneButton *_buttons[PUMP_AMOUNT] = {&_pumpButton1, &_pumpButton2};
 
 bool _isWatering;
 
@@ -78,9 +78,9 @@ void TryPrintSelectedPumpStatus()
 #pragma region Pump Handlers
 void OnPumpStopped(Pump* pump){
   int pumpIndex = 0;
-  while (_pumps[pumpIndex]!= pump && pumpIndex  <= PUPM_AMOUNT)
+  while (_pumps[pumpIndex]!= pump && pumpIndex  <= PUMP_AMOUNT)
     pumpIndex++;
-  if(pumpIndex == PUPM_AMOUNT)
+  if(pumpIndex == PUMP_AMOUNT)
     return;
 
   Serial.println("OnPumpStopped| pumpIndex: " + String(pumpIndex));
@@ -139,13 +139,13 @@ void setup()
 
   _autoWateringLcd.IsAutoOff = IS_LCD_AUTO_OFF;
   _autoWateringLcd.TimeoutInSeconds = Lcd_TIMEOUT_SECONDS;
-  _autoWateringLcd.Init(PUPM_AMOUNT);
+  _autoWateringLcd.Init(PUMP_AMOUNT);
   _autoWateringLcd.AttachOnSelectedPumpChanged([]() { TryPrintSelectedPumpStatus(); });
   _autoWateringLcd.Refresh(_autoWateringStateMachine.GetState());
 
   _dataStorage.Init();
   auto nowTimeStampInSeconds = _realTimeClock.GetNowTimeStamp();
-  for (int i = 0; i < PUPM_AMOUNT; i++)
+  for (int i = 0; i < PUMP_AMOUNT; i++)
   {
     auto pump = new Pump(PIN_FirstPump + i);
     _pumps[i] = pump;
@@ -198,7 +198,7 @@ void setup()
 
 void HandleButtonsTick()
 {
-  for (int i = 0; i < PUPM_AMOUNT; i++)
+  for (int i = 0; i < PUMP_AMOUNT; i++)
   {
     auto button = _buttons[i];
     button->tick();
@@ -207,7 +207,7 @@ void HandleButtonsTick()
 
 void UpdateIsWatering()
 {
-  for (int i = 0; i < PUPM_AMOUNT; i++)
+  for (int i = 0; i < PUMP_AMOUNT; i++)
   {
     auto pump = _pumps[i];
     _isWatering = pump->GetIsWorking();
@@ -218,7 +218,7 @@ void UpdateIsWatering()
 
 void HandlePumpsTick()
 {
-  for (int i = 0; i < PUPM_AMOUNT; i++)
+  for (int i = 0; i < PUMP_AMOUNT; i++)
   {
     auto pump = _pumps[i];
     auto beforeIsPumpWatering = pump->GetIsWorking();

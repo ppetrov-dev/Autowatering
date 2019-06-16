@@ -1,6 +1,6 @@
 #include "AutoWateringLcd.h"
 
-AutoWateringLcd::AutoWateringLcd(byte columnCount, byte rowCount): _lcd(0x27, columnCount, rowCount)
+AutoWateringLcd::AutoWateringLcd(byte columnCount, byte rowCount): _lcd(I2C_LcdAddress, columnCount, rowCount)
 {
     _columnCount = columnCount;
     _rowCount = rowCount;
