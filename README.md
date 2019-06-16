@@ -84,7 +84,7 @@ version 1.2 - current
 
 <a id="what-next"></a>
 ## What next
-I don't have any certain plans for the project. I'd add a soil moisture sensor or/and real-time clocks module. Most likely it will be connected with the Internet. I'll create an account in Twitter for my plants and they will post how comfortable they live. Will see.
+I don't have any certain plans for the project. I'd add a soil moisture sensor. Also, I want the device can work with several modes: by a timer, by a real-time clock and by moisture sensor or combinations of the modes. To set up modes and additional settings I will use a bigger display. Most likely it will be connected with the Internet. I'll create an account on Twitter for my plants and they will post how comfortable they live. And most probably when I finish all above I'd develop phone application for the device. Will see.
 
 [whatYouNeed]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.2/Screenshots/WhatYouNeed.png
 [howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.2/Screenshots/HowToConnectDiodes.jpg
