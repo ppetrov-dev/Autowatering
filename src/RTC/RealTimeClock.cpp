@@ -1,6 +1,6 @@
 #include "RealTimeClock.h"
 
-char RealTimeClock::_weekDay[7][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+char RealTimeClock::_weekDay[7][4] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
 void RealTimeClock::Begin()
 {
@@ -21,7 +21,7 @@ String RealTimeClock::GetStringNow()
 String RealTimeClock::GetStringDateTime(DateTime dateTime)
 {
     String stringBuilder;
-    stringBuilder.concat(_weekDay[dateTime.dayOfWeek()]);
+    stringBuilder.concat(_weekDay[dateTime.dayOfWeek() - 1]);
     stringBuilder.concat(", " + String(dateTime.year()) + '/');
     stringBuilder.concat(String(dateTime.month()) + '/');
     stringBuilder.concat(String(dateTime.date()) + ' ');

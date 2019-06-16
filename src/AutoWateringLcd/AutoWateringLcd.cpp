@@ -1,6 +1,6 @@
 #include "AutoWateringLcd.h"
 
-AutoWateringLcd::AutoWateringLcd(byte columnCount, byte rowCount, AutoWateringUltrasonicSensor* autoWateringUltrasonicSensor): _lcd(0x27, columnCount, rowCount), _autoWateringUltrasonicSensor(autoWateringUltrasonicSensor)
+AutoWateringLcd::AutoWateringLcd(byte columnCount, byte rowCount, AutoWateringUltrasonicSensor* autoWateringUltrasonicSensor): _lcd(I2C_LcdAddress, columnCount, rowCount), _autoWateringUltrasonicSensor(autoWateringUltrasonicSensor)
 {
     _columnCount = columnCount;
     _rowCount = rowCount;

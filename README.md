@@ -52,6 +52,8 @@ Also I added capacitor in the scheme and connected it to arduino outs:
 
 And I have different pins to connect modules you can find them in "settings.h" file:
 ```C++
+#define I2C_LcdAddress 0x27
+
 #define PIN_EncoderClk 2
 #define PIN_EncoderDt 3
 #define PIN_EncoderSw 4

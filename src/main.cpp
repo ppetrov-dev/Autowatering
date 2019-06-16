@@ -17,7 +17,7 @@ MyRotaryEncoder _autoWateringEncoder = MyRotaryEncoder(PIN_EncoderClk, PIN_Encod
 
 AutoWateringLcd _autoWateringLcd = AutoWateringLcd(16, 2, &_autoWateringUltrasonicSensor);
 MyTimer _oneSecondTimer;
-MyTimer _TwoSecondTimer;
+MyTimer _twoSecondTimer;
 RealTimeClock _realTimeClock;
 
 DataStorage _dataStorage(PUMP_AMOUNT);
@@ -224,9 +224,9 @@ void setup()
   _oneSecondTimer.AttachOnTick([]() { TryUpdateSelectedPumpStatusOrInfo(); });
   _oneSecondTimer.Start();
 
-  _TwoSecondTimer.SetInterval(2000);
-  _TwoSecondTimer.AttachOnTick([]() { _autoWateringUltrasonicSensor.Tick(); });
-  _TwoSecondTimer.Start();
+  _twoSecondTimer.SetInterval(2000);
+  _twoSecondTimer.AttachOnTick([]() { _autoWateringUltrasonicSensor.Tick(); });
+  _twoSecondTimer.Start();
 }
 
 void HandleButtonsTick()
@@ -269,7 +269,7 @@ void loop()
   _autoWateringEncoder.Tick();
   _autoWateringLcd.Tick();
   _oneSecondTimer.Tick();
-  _TwoSecondTimer.Tick();
+  _twoSecondTimer.Tick();
   HandleButtonsTick();
 
   if (_autoWateringUltrasonicSensor.GetIsEmpty())
