@@ -1,6 +1,6 @@
 #include "AutoWateringLcd.h"
 
-AutoWateringLcd::AutoWateringLcd(byte columnCount, byte rowCount): _lcd(0x27, columnCount, rowCount)
+AutoWateringLcd::AutoWateringLcd(byte columnCount, byte rowCount, AutoWateringUltrasonicSensor* autoWateringUltrasonicSensor): _lcd(0x27, columnCount, rowCount), _autoWateringUltrasonicSensor(autoWateringUltrasonicSensor)
 {
     _columnCount = columnCount;
     _rowCount = rowCount;
@@ -224,6 +224,22 @@ void AutoWateringLcd::PrintWaitRow()
     PrintWaitHours();
     PrintWaitMinutes();
 }
+
+void AutoWateringLcd::PrintInfo()
+{
+    auto isUnknown = _autoWateringUltrasonicSensor->GetIsUnkown();
+    _lcd.setCursor(0, 0);
+    auto fullness = _autoWateringUltrasonicSensor->GetFullnessInPercents();
+    auto fullnessString = isUnknown? "Unknown" : String(fullness) + "%";
+    
+    _lcd.print(ConstrainInputText("Full: " + fullnessString));
+
+    _lcd.setCursor(0, 1);
+    auto distance = _autoWateringUltrasonicSensor->GetDistance();
+    auto distanceString = isUnknown? "Unknown" : String(distance) + "cm";
+    _lcd.print(ConstrainInputText("Dist: " + distanceString));
+}
+
 void AutoWateringLcd::PrintState(AutoWateringState state)
 {
     switch (state)
@@ -249,6 +265,10 @@ void AutoWateringLcd::PrintState(AutoWateringState state)
         PrintBack();
         PrintWorkRow();
         break;
+    case WatchInfoState:
+        ClearRow(0);
+        PrintInfo();
+        break;
     default:
         break;
     }
@@ -257,22 +277,22 @@ void AutoWateringLcd::PrintState(AutoWateringState state)
 }
 String AutoWateringLcd::ConstrainInputText(String inputedText)
 {
-    auto lenght = inputedText.length();
+    auto length = inputedText.length();
 
-    if (lenght < _columnCount)
+    if (length < _columnCount)
     {
         auto indexOfFirstSpace = inputedText.indexOf(" ");
         if (indexOfFirstSpace != -1)
         {
             auto firstSubstring = inputedText.substring(0, indexOfFirstSpace);
-            auto secondSubstring = inputedText.substring(indexOfFirstSpace, lenght);
+            auto secondSubstring = inputedText.substring(indexOfFirstSpace, length);
             
-            for (byte i = 0; i < _columnCount - lenght; i++)
+            for (byte i = 0; i < _columnCount - length; i++)
                 firstSubstring.concat(" ");
             inputedText = firstSubstring + secondSubstring;
         }
         else{
-             for (byte i = 0; i < _columnCount - lenght; i++)
+             for (byte i = 0; i < _columnCount - length; i++)
                 inputedText.concat(" ");
         }
     }
@@ -300,6 +320,9 @@ void AutoWateringLcd::UpdateState(AutoWateringState newState)
     UpdateActivityTimeAndSwitchOnIfNeeded();
 }
 
+void AutoWateringLcd::UpdateInfo(){
+    PrintInfo();
+}
 void AutoWateringLcd::SetSelectedPumpIndex(int newPumpIndex)
 {
     if (_selectedPumpIndex == newPumpIndex)

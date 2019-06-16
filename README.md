@@ -60,7 +60,7 @@ And I have different pins to connect modules you can find them in "settings.h" f
 #define PIN_Button2 6
 
 #define PIN_FirstPump 7
-#define PUPM_AMOUNT 2
+#define PUMP_AMOUNT 2
 ```
 I use 2 pumps (D7 and D8 outs in Arduiono) but you can add more. See code how to implement that. Also you can remove buttons if you don't need them and use their pins to connect extra pumps.  
 

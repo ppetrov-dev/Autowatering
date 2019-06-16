@@ -12,7 +12,7 @@ class DataStorage
 private:
     unsigned int _eepromAddress = 130;
     int _amount;
-    Data *_dataArray[PUPM_AMOUNT];
+    Data *_dataArray[PUMP_AMOUNT];
     unsigned int GetDataAddress();
     bool EqualsData(Data* savedData, Data* data);
 

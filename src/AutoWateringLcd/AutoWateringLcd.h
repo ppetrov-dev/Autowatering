@@ -7,6 +7,7 @@
 #include "MyDateTimeConverters.h"
 #include "Time/WorkTime.h"
 #include "Time/WaitTime.h"
+#include "AutoWateringUltrasonicSensor/AutoWateringUltrasonicSensor.h"
 
 extern "C" {
     typedef void (*autoWateringLcdCallback)(void);
@@ -16,6 +17,7 @@ class AutoWateringLcd
 {
 private:
     autoWateringLcdCallback _onSelectedPumpChangedCallback;
+    AutoWateringUltrasonicSensor* _autoWateringUltrasonicSensor;
 
     unsigned long _lastActivityTimeInMilliseconds;
     LiquidCrystal_I2C _lcd;
@@ -42,8 +44,9 @@ private:
     void PrintPumpName();
     void PrintSettings();
     void PrintBack();
+    void PrintInfo();
     void PrintState(AutoWateringState state);
-
+    
     void PrintWaitDays();
     void PrintWaitHours();
     void PrintWaitMinutes();
@@ -54,12 +57,13 @@ public:
     bool IsAutoOff = true;
     byte TimeoutInSeconds = 30;
     
-    AutoWateringLcd(byte columnCount, byte rowCount);
+    AutoWateringLcd(byte columnCount, byte rowCount, AutoWateringUltrasonicSensor* autoWateringUltrasonicSensor);
     void Init(byte pumpAmount);
     void Refresh(AutoWateringState state);
     int GetSelectedPumpIndex();
     void UpdateState(AutoWateringState newState);
     void UpdateSelectedValues(AutoWateringState state, int increment);
+    void UpdateInfo();
     
     void PrintOnRow(byte rowIndex, String text);
     void ClearRow(byte rowIndex);

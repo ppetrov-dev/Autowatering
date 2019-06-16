@@ -108,6 +108,8 @@ AutoWateringState AutoWateringStateMachine::GetNextState()
     case SelectPumpState:
         return SelectSettingsState;
     case SelectSettingsState:
+        return WatchInfoState;
+    case WatchInfoState:
         return SelectPumpState;
 
     case SelectBackState:
@@ -131,9 +133,11 @@ AutoWateringState AutoWateringStateMachine::GetPreviousState()
     switch (_autoWateringState)
     {
     case SelectPumpState:
-        return SelectSettingsState;
+        return WatchInfoState;
     case SelectSettingsState:
         return SelectPumpState;
+    case WatchInfoState:
+        return SelectSettingsState;
 
     case SelectBackState:
         return SelectWaitMinutesState;

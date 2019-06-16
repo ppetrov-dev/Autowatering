@@ -9,9 +9,10 @@
 #define IS_ENCODER_REVERSED 1
 #define IS_PARALLEL_WATERING_DISABLED 1
 
+#define DISTANCE_TO_BOTTOM_CM 30
 #define ACCEPTABLE_TIME_OFFSET_SECONDS 300
 #define FORCEDLY_STARTED_PUMP_SECONDS 15
-#define Lcd_TIMEOUT_SECONDS 60
+#define LCD_TIMEOUT_SECONDS 60
 #define ENCODER_TYPE 1 // 0 or 1, change the type If incorrect working
 
 #define PIN_EncoderClk 2
@@ -21,8 +22,11 @@
 #define PIN_Button1 5
 #define PIN_Button2 6
 
+#define PIN_UltrasonicSensorTrigger A2
+#define PIN_UltrasonicSensorEcho 12
+
 #define PIN_FirstPump 7
-#define PUPM_AMOUNT 2
+#define PUMP_AMOUNT 2
 
 #define RELAY_TYPE HighLevel
 

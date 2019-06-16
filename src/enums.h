@@ -12,6 +12,7 @@ enum AutoWateringState
   SelectPumpState,
   SelectSettingsState,
   SelectBackState,
+  WatchInfoState,
 };
 
 enum Command{
