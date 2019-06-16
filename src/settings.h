@@ -16,6 +16,8 @@
 #define ENCODER_TYPE 1 // 0 or 1, change the type If incorrect working
 
 #define I2C_LcdAddress 0x27
+// #define DS3231_ADDRESS	      0x68 //I2C Slave address - from Sodaq_DS3231.cpp
+
 #define PIN_EncoderClk 2
 #define PIN_EncoderDt 3
 #define PIN_EncoderSw 4
