@@ -22,7 +22,8 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * Maximum time for a pump to wait is almost 10 days (-1 minute), to work - almost 1 day (-1 second) 
 * Forse start/stop pumps by buttons commands (double click, hold press/release)
 * Different timers display remaining time to change a pump state, force start timer in seconds 
-* Save timestamp (in seconds) of last pumps watering **(added in version 1.1)**
+* Save timestamp (in seconds) of last pumps watering (added in version 1.1)
+* Use HC-SR04 Ultrasonic Sensor to determine the fullness of the water tank  **(added in version 1.2)**
 
 <a id="what-you-need-to-repeats"></a>
 ## What you need to repeat
@@ -40,7 +41,8 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * Сapacitor 470uf or more (optional)
 * Check valves x2 (optional)
 * Water hose (optional)
-* DS3231 **(added in version 1.1)**
+* DS3231 (added in version 1.1)
+* HC-SR04 Ultrasonic Sensor **(added in version 1.2)**
 
 <a id="how-to-connect"></a>
 ## How to connect
@@ -64,19 +66,27 @@ And I have different pins to connect modules you can find them in "settings.h" f
 
 #define PIN_FirstPump 7
 #define PUMP_AMOUNT 2
-```
-I use 2 pumps (D7 and D8 outs in Arduino) but you can add more. See code how to implement that. Also you can remove buttons if you don't need them and use their pins to connect extra pumps.  
 
+#define PIN_UltrasonicSensorTrigger A2
+#define PIN_UltrasonicSensorEcho 12
+```
+I use 2 pumps (D7 and D8 outs in Arduino) but you can add more. See code how to implement that. Also, you can remove buttons if you don't need them and use their pins to connect extra pumps. 
+As a water tank, I use a 10-liter plastic bottle and the height from ultrasonic sensor to the bottom of the bottle is about 30 cm - change the parameter in settings.h file for your tanks:
+```C++
+#define DISTANCE_TO_BOTTOM_CM 30
+```
+Possible, I will move a setup of the parameters to the program of the device in future.
 <a id="versions"></a>
 ## Versions
 [version 1.0](https://github.com/ppetrov-dev/Autowatering/tree/version-1.0)<br/>
-version 1.1 - current
+[version 1.1](https://github.com/ppetrov-dev/Autowatering/tree/version-1.1)<br/>
+version 1.2 - current
 
 <a id="what-next"></a>
 ## What next
 I don't have any certain plans for the project. I'd add a soil moisture sensor or/and real-time clocks module. Most likely it will be connected with the Internet. I'll create an account in Twitter for my plants and they will post how comfortable they live. Will see.
 
-[whatYouNeed]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.1/Screenshots/WhatYouNeed.png
-[howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.1/Screenshots/HowToConnectDiodes.jpg
-[howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.1/Screenshots/HowToConnectCapacitor.png
-[device]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.1/Screenshots/device.png
+[whatYouNeed]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.2/Screenshots/WhatYouNeed.png
+[howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.2/Screenshots/HowToConnectDiodes.jpg
+[howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.2/Screenshots/HowToConnectCapacitor.png
+[device]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.2/Screenshots/device.png

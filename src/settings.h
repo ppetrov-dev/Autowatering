@@ -25,11 +25,11 @@
 #define PIN_Button1 5
 #define PIN_Button2 6
 
-#define PIN_UltrasonicSensorTrigger A2
-#define PIN_UltrasonicSensorEcho 12
-
 #define PIN_FirstPump 7
 #define PUMP_AMOUNT 2
+
+#define PIN_UltrasonicSensorTrigger A2
+#define PIN_UltrasonicSensorEcho 12
 
 #define RELAY_TYPE HighLevel
 
