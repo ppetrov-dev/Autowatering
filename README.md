@@ -1,6 +1,6 @@
 # Autowatering - Arduino DIY project
 
-The project based on Alex Gyvyer' project (https://github.com/AlexGyver/Auto-Pumps) for plants autowatering. All the code was modified. For programming I use VS Code + Platform IO (https://platformio.org/).
+The project based on Alex Gyvyer' project (https://github.com/AlexGyver/Auto-Pumps) for plants auto watering. All the code was modified. For programming I use VS Code + Platform IO (https://platformio.org/).
 
 Potentially many pumps could be added but I assembled the circuit and designed the box (https://www.thingiverse.com/thing:3607432) for 2 pumps. But this box was too small to put there all cables and I used another one from AliExpress. Also I've added 2 buttons for force starting of the pumps.
 
@@ -52,6 +52,9 @@ See scheme of original project (https://github.com/AlexGyver/Auto-Pumps). I've d
 Also I added capacitor in the scheme and connected it to arduino outs:
 ![alt text][howToConnectCapacitor]
 
+The RTC module and Lcd screen must be connected via the I2C interface (A4 and A5 pins - SDA and SCL outputs). See the following image (from the Internet): 
+![alt text][i2c_devices]
+
 And I have different pins to connect modules you can find them in "settings.h" file:
 ```C++
 #define I2C_LcdAddress 0x27
@@ -90,3 +93,5 @@ I don't have any certain plans for the project. I'd add a soil moisture sensor. 
 [howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.2/Screenshots/HowToConnectDiodes.jpg
 [howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.2/Screenshots/HowToConnectCapacitor.png
 [device]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.2/Screenshots/device.png
+[howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.1/Screenshots/HowToConnectCapacitor.png
+[i2c_devices]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.1/Screenshots/i2c_devices.jpg
