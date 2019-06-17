@@ -1,6 +1,6 @@
 # Autowatering - Arduino DIY project
 
-The project based on Alex Gyvyer' project (https://github.com/AlexGyver/Auto-Pumps) for plants autowatering. All the code was modified. For programming I use VS Code + Platform IO (https://platformio.org/).
+The project based on Alex Gyvyer' project (https://github.com/AlexGyver/Auto-Pumps) for plants auto watering. All the code was modified. For programming I use VS Code + Platform IO (https://platformio.org/).
 
 Potentially many pumps could be added but I assembled the circuit and designed the box (https://www.thingiverse.com/thing:3607432) for 2 pumps. But this box was too small to put there all cables and I used another one from AliExpress. Also I've added 2 buttons for force starting of the pumps.
 
@@ -16,11 +16,11 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 ## The main improvements 
 * Object-oriented and readable code, as much as possible
 * Separated file for settings (pins, timeout time etc)
-* Separated menu in the system interface to set working and wating times of pumps
+* Separated menu in the system interface to set working and waiting times of pumps
 * Saving data in Arduino memory (EEPROM) happens when an user leaves menu settings and if changes are
 * Minimum time for a pump to wait is 1 minute, to work - 1 second 
 * Maximum time for a pump to wait is almost 10 days (-1 minute), to work - almost 1 day (-1 second) 
-* Forse start/stop pumps by buttons commands (double click, hold press/release)
+* Force start/stop pumps by buttons commands (double click, hold press/release)
 * Different timers display remaining time to change a pump state, force start timer in seconds 
 
 <a id="what-you-need-to-repeats"></a>
@@ -62,7 +62,7 @@ And I have different pins to connect modules you can find them in "settings.h" f
 #define PIN_FirstPump 7
 #define PUMP_AMOUNT 2
 ```
-I use 2 pumps (D7 and D8 outs in Arduiono) but you can add more. See code how to implement that. Also you can remove buttons if you don't need them and use their pins to connect extra pumps.  
+I use 2 pumps (D7 and D8 outs in Arduino) but you can add more. See code how to implement that. Also you can remove buttons if you don't need them and use their pins to connect extra pumps.  
 
 <a id="versions"></a>
 ## Versions
