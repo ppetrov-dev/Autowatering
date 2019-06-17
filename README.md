@@ -16,11 +16,11 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 ## The main improvements 
 * Object-oriented and readable code, as much as possible
 * Separated file for settings (pins, timeout time etc)
-* Separated menu in the system interface to set working and wating times of pumps
+* Separated menu in the system interface to set working and waiting times of pumps
 * Saving data in Arduino memory (EEPROM) happens when an user leaves menu settings and if changes are
 * Minimum time for a pump to wait is 1 minute, to work - 1 second 
 * Maximum time for a pump to wait is almost 10 days (-1 minute), to work - almost 1 day (-1 second) 
-* Forse start/stop pumps by buttons commands (double click, hold press/release)
+* Force start/stop pumps by buttons commands (double click, hold press/release)
 * Different timers display remaining time to change a pump state, force start timer in seconds 
 * Save timestamp (in seconds) of last pumps watering (added in version 1.1)
 * Use HC-SR04 Ultrasonic Sensor to determine the fullness of the water tank  **(added in version 1.2)**
@@ -33,7 +33,7 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * Lcd1602 module with I2C
 * Rotary encoder
 * Buttons x2
-* Pumps (5V) x2 **(than I used 12V pumps + step up converter)**
+* Pumps (12V) x2 + lm2577 step up converter **(or use 5V without converter)**
 * Power supply (5V)
 * Wires to connect, circuit board
 * Box
