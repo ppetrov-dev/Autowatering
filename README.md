@@ -50,6 +50,9 @@ See scheme of original project (https://github.com/AlexGyver/Auto-Pumps). I've d
 Also I added capacitor in the scheme and connected it to arduino outs:
 ![alt text][howToConnectCapacitor]
 
+The RTC module and Lcd screen must be connected via the I2C interface (A4 and A5 pins - SDA and SCL outputs). See the following image (from the Internet): 
+![alt text][i2c_devices]
+
 And I have different pins to connect modules you can find them in "settings.h" file:
 ```C++
 #define I2C_LcdAddress 0x27
@@ -80,3 +83,5 @@ I don't have any certain plans for the project. I'd add a soil moisture sensor. 
 [howToConnectDiodes]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.1/Screenshots/HowToConnectDiodes.jpg
 [howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.1/Screenshots/HowToConnectCapacitor.png
 [device]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.1/Screenshots/device.png
+[howToConnectCapacitor]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.1/Screenshots/HowToConnectCapacitor.png
+[i2c_devices]: https://github.com/ppetrov-dev/Autowatering/raw/version-1.1/Screenshots/i2c_devices.jpg
