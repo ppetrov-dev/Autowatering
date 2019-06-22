@@ -4,6 +4,7 @@ The project based on Alex Gyvyer' project (https://github.com/AlexGyver/Auto-Pum
 
 Potentially many pumps could be added but I assembled the circuit and designed the box (https://www.thingiverse.com/thing:3607432) for 2 pumps. But this box was too small to put there all cables and I used another one from AliExpress. Also I've added 2 buttons for force starting of the pumps.
 
+* [Link to video on YouTube](#video-link)
 * [The main improvements](#The-main-improvements)
 * [What you need to repeat](#what-you-need-to-repeats)
 * [How to connect](#how-to-connect)
@@ -11,6 +12,10 @@ Potentially many pumps could be added but I assembled the circuit and designed t
 * [What next](#what-next)
 
 ![alt text][device]
+
+<a id="video-link"></a>
+## Link to video on YouTube
+https://www.youtube.com/watch?v=Nk5SpDqHN3k
 
 <a id="The-main-improvements"></a>
 ## The main improvements 
